@@ -23,7 +23,6 @@ const produtos: Produto[] = [
 ]
 
 export default function CardapioDigital() {
-  const [darkMode, setDarkMode] = useState(false)
   const [carrinho, setCarrinho] = useState<Produto[]>([])
   const [carrinhoAberto, setCarrinhoAberto] = useState(false)
 
