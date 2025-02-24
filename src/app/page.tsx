@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import Image from "next/image"
 
 interface Produto {
   id: number;
@@ -111,7 +112,7 @@ export default function CardapioDigital() {
                 <CardDescription className="text-pink-500 dark:text-pink-4f00">{produto.descricao}</CardDescription>
               </CardHeader>
               <CardContent>
-                <img
+                <Image
                   src={produto.imagem || "/placeholder.svg"}
                   alt={produto.nome}
                   className="w-full h-48 object-cover rounded-md shadow-md hover:scale-105 transition-transform duration-300"
