@@ -39,7 +39,7 @@ const produtos: Produto[] = [
     id: 1,
     nome: "Bolo Redondo",
     descricao: "Varios tipos de bolos redondos, monte o seu",
-    preco: 45.0,
+    preco: 110.0,
     imagem: "/bolo-chocolate.jpeg",
   },
   {
