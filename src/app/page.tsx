@@ -16,19 +16,30 @@ const sour_candy = Sour_Candy({ weight: "400", subsets: ["latin"] })
 export const runtime = "edge"
 
 interface Produto {
-  id: number
+  id: number | string
   nome: string
-  descricao: string
+  descricao?: string
   preco: number
-  imagem: string
+  imagem?: string
+  tamanho?: string
+  recheios?: string[]
+  adicionais?: string[]
+  dataEntrega?: string
+  tipoEntrega?: "retirada" | "entrega"
+  endereco?: {
+    rua: string
+    bairro: string
+    numero: string
+    complemento: string
+  } | null
 }
 
 const produtos: Produto[] = [
   {
     id: 1,
     nome: "Bolo Redondo",
-    descricao: "Diferentes sabores e tamanhos para sua festa",
-    preco: 110.0,
+    descricao: "Varios tipos de bolos redondos, monte o seu",
+    preco: 45.0,
     imagem: "/bolo-chocolate.jpeg",
   },
   {
@@ -58,7 +69,7 @@ export default function CardapioDigital() {
   const [carrinho, setCarrinho] = useState<Produto[]>([])
   const [carrinhoAberto, setCarrinhoAberto] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
-  const [boloDialogOpen, setBoloDialogOpen] = useState(false)
+  const [boloRedondoDialogOpen, setBoloRedondoDialogOpen] = useState(false)
 
   useEffect(() => {
     // Simula o processo de login
@@ -78,8 +89,8 @@ export default function CardapioDigital() {
 
   const adicionarAoCarrinho = (produto: Produto) => {
     if (produto.id === 1) {
-      // Bolo de Chocolate
-      setBoloDialogOpen(true)
+      // Bolo Redondo
+      setBoloRedondoDialogOpen(true)
     } else {
       setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
     }
@@ -91,12 +102,42 @@ export default function CardapioDigital() {
 
   const enviarPedido = () => {
     const numeroWhatsApp = "5567996184308" // Altere para o número da boleira
-    let mensagem = "Olá, gostaria de pedir:\n"
-    carrinho.forEach((item) => {
-      mensagem += `- ${item.nome} (R$${item.preco.toFixed(2)})\n`
+    let mensagem = "Olá, gostaria de fazer o seguinte pedido:\n\n"
+
+    carrinho.forEach((item, index) => {
+      mensagem += `${index + 1}. ${item.nome}\n`
+      mensagem += `   Preço: R$${item.preco.toFixed(2)}\n`
+
+      if (item.tamanho) {
+        mensagem += `   Tamanho: ${item.tamanho}\n`
+      }
+
+      if (item.recheios && item.recheios.length > 0) {
+        mensagem += `   Recheios: ${item.recheios.join(", ")}\n`
+      }
+
+      if (item.adicionais && item.adicionais.length > 0) {
+        mensagem += `   Adicionais: ${item.adicionais.join(", ")}\n`
+      }
+
+      if (item.dataEntrega) {
+        mensagem += `   Data de Entrega: ${item.dataEntrega}\n`
+      }
+
+      if (item.tipoEntrega) {
+        mensagem += `   Tipo de Entrega: ${item.tipoEntrega}\n`
+      }
+
+      if (item.endereco) {
+        mensagem += `   Endereço de Entrega: ${item.endereco.rua}, ${item.endereco.numero}, ${item.endereco.bairro}, ${item.endereco.complemento}\n`
+      }
+
+      mensagem += "\n"
     })
+
     const total = carrinho.reduce((sum, item) => sum + item.preco, 0)
-    mensagem += `\nTotal: R$${total.toFixed(2)}`
+    mensagem += `Total do Pedido: R$${total.toFixed(2)}`
+
     const url = `https://api.whatsapp.com/send?phone=${numeroWhatsApp}&text=${encodeURIComponent(mensagem)}`
     window.open(url, "_blank")
   }
@@ -152,14 +193,31 @@ export default function CardapioDigital() {
                 </SheetHeader>
                 <ScrollArea className="h-[70vh] mt-4">
                   {carrinho.map((item, index) => (
-                    <div key={index} className="flex justify-between items-center mb-4 p-2 bg-pink-100 rounded-lg">
-                      <div>
-                        <h3 className="font-semibold">{item.nome}</h3>
-                        <p className="text-sm text-pink-600">R${item.preco.toFixed(2)}</p>
+                    <div key={index} className="mb-4 p-4 bg-pink-100 rounded-lg">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-semibold">{item.nome}</h3>
+                          <p className="text-sm text-pink-600">R${item.preco.toFixed(2)}</p>
+                        </div>
+                        <Button variant="ghost" onClick={() => removerDoCarrinho(index)}>
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <Button variant="ghost" onClick={() => removerDoCarrinho(index)}>
-                        <X className="h-4 w-4" />
-                      </Button>
+                      {item.tamanho && <p className="text-sm mt-2">Tamanho: {item.tamanho}</p>}
+                      {item.recheios && item.recheios.length > 0 && (
+                        <p className="text-sm mt-1">Recheios: {item.recheios.join(", ")}</p>
+                      )}
+                      {item.adicionais && item.adicionais.length > 0 && (
+                        <p className="text-sm mt-1">Adicionais: {item.adicionais.join(", ")}</p>
+                      )}
+                      {item.dataEntrega && <p className="text-sm mt-1">Data de Entrega: {item.dataEntrega}</p>}
+                      {item.tipoEntrega && <p className="text-sm mt-1">Tipo de Entrega: {item.tipoEntrega}</p>}
+                      {item.endereco && (
+                        <p className="text-sm mt-1">
+                          Endereço: {item.endereco.rua}, {item.endereco.numero}, {item.endereco.bairro},{" "}
+                          {item.endereco.complemento}
+                        </p>
+                      )}
                     </div>
                   ))}
                 </ScrollArea>
@@ -205,7 +263,7 @@ export default function CardapioDigital() {
                       onClick={() => adicionarAoCarrinho(produto)}
                       className="bg-pink-500 hover:bg-pink-600 text-white transition-colors duration-300 rounded-full px-6 py-2"
                     >
-                      Adicionar
+                      {produto.id === 1 ? "Personalizar" : "Adicionar"}
                     </Button>
                   </div>
                 </CardContent>
@@ -215,11 +273,11 @@ export default function CardapioDigital() {
         </div>
       </div>
       <BoloRedondoDialog
-        isOpen={boloDialogOpen}
-        onClose={() => setBoloDialogOpen(false)}
+        isOpen={boloRedondoDialogOpen}
+        onClose={() => setBoloRedondoDialogOpen(false)}
         onAddToCart={(produto) => {
           setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
-          setBoloDialogOpen(false)
+          setBoloRedondoDialogOpen(false)
         }}
       />
     </div>
