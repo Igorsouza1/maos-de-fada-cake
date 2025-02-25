@@ -2,14 +2,15 @@
 
 import { useState, useEffect } from "react"
 import { ShoppingCart, X } from "lucide-react"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import Image from "next/image"
-import { Pacifico } from "next/font/google"
+import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] })
+const sour_candy = Sour_Candy({ weight: "400", subsets: ["latin"] })
 
 export const runtime = "edge"
 
@@ -111,13 +112,15 @@ export default function CardapioDigital() {
   return (
     <div className="min-h-screen bg-white">
       {/* Background pattern section */}
-      <div className="relative h-72 bg-repeat" style={{ backgroundImage: "url('/background.PNG')" }}>
+      <div className="relative w-auto h-72 bg-repeat" style={{ backgroundImage: "url('/background.PNG')" }}>
         <div className="absolute inset-0 bg-black/10" /> {/* Overlay para melhorar legibilidade */}
         <div className="relative pt-12 pb-8 text-center">
           <h1 className={`${pacifico.className} text-5xl font-bold text-white mb-2 drop-shadow-lg`}>
             Mãos de Fada Cake
           </h1>
-          <p className="text-white italic text-lg drop-shadow-md">Delícias artesanais para adoçar seu dia</p>
+          <p className={`${sour_candy.className} text-white italic text-lg drop-shadow-md`}>
+            Delícias artesanais para adoçar seu dia
+          </p>
         </div>
       </div>
 
@@ -165,29 +168,40 @@ export default function CardapioDigital() {
             </Sheet>
 
             {produtos.map((produto) => (
-              <Card key={produto.id} className="bg-white shadow-lg hover:shadow-xl transition-shadow duration-300">
-                <CardHeader>
-                  <CardTitle className="text-2xl font-serif text-pink-700">{produto.nome}</CardTitle>
-                  <CardDescription className="text-pink-500">{produto.descricao}</CardDescription>
+              <Card
+                key={produto.id}
+                className="bg-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 rounded-xl overflow-hidden"
+              >
+                <CardHeader className="p-0">
+                  <div className="relative h-48 w-full">
+                    <Image
+                      src={produto.imagem || "/placeholder.svg"}
+                      alt={produto.nome}
+                      layout="fill"
+                      objectFit="cover"
+                      className="transition-transform duration-300 hover:scale-110"
+                    />
+                  </div>
                 </CardHeader>
-                <CardContent>
-                  <Image
-                    src={produto.imagem || "/placeholder.svg"}
-                    alt={produto.nome}
-                    width={300}
-                    height={200}
-                    className="w-full h-48 object-cover rounded-md shadow-md hover:scale-105 transition-transform duration-300"
-                  />
+                <CardContent className="p-6">
+                  <CardTitle className={`${pacifico.className} text-2xl font-bold text-pink-700 mb-2`}>
+                    {produto.nome}
+                  </CardTitle>
+                  <CardDescription className={`${sour_candy.className} text-pink-500 mb-4`}>
+                    {produto.descricao}
+                  </CardDescription>
+                  <div className="flex justify-between items-center">
+                    <span className={`${sour_candy.className} text-2xl font-semibold text-pink-600`}>
+                      R${produto.preco.toFixed(2)}
+                    </span>
+                    <Button
+                      onClick={() => adicionarAoCarrinho(produto)}
+                      className="bg-pink-500 hover:bg-pink-600 text-white transition-colors duration-300 rounded-full px-6 py-2"
+                    >
+                      Adicionar
+                    </Button>
+                  </div>
                 </CardContent>
-                <CardFooter className="flex justify-between items-center">
-                  <span className="text-xl font-semibold text-pink-600">R${produto.preco.toFixed(2)}</span>
-                  <Button
-                    onClick={() => adicionarAoCarrinho(produto)}
-                    className="bg-pink-500 hover:bg-pink-600 text-white"
-                  >
-                    Adicionar ao Carrinho
-                  </Button>
-                </CardFooter>
               </Card>
             ))}
           </div>
