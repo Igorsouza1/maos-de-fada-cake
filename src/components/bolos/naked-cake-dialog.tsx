@@ -9,7 +9,6 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Pacifico, Sour_Gummy as Sour_Candy } from 'next/font/google'
 import { Separator } from "@/components/ui/separator"
 import { Calendar } from "@/components/ui/calendar"
-import { Input } from "@/components/ui/input"
 import { format, addDays, isBefore } from "date-fns"
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] })
