@@ -8,6 +8,7 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import Image from "next/image"
 import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
+import { BoloRedondoDialog } from "@/components/bolos/bolo-redondo-dialog"
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] })
 const sour_candy = Sour_Candy({ weight: "400", subsets: ["latin"] })
@@ -25,9 +26,9 @@ interface Produto {
 const produtos: Produto[] = [
   {
     id: 1,
-    nome: "Bolo de Chocolate",
-    descricao: "Delicioso bolo de chocolate com cobertura cremosa",
-    preco: 45.0,
+    nome: "Bolo Redondo",
+    descricao: "Diferentes sabores e tamanhos para sua festa",
+    preco: 110.0,
     imagem: "/bolo-chocolate.jpeg",
   },
   {
@@ -57,6 +58,7 @@ export default function CardapioDigital() {
   const [carrinho, setCarrinho] = useState<Produto[]>([])
   const [carrinhoAberto, setCarrinhoAberto] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
+  const [boloDialogOpen, setBoloDialogOpen] = useState(false)
 
   useEffect(() => {
     // Simula o processo de login
@@ -75,7 +77,12 @@ export default function CardapioDigital() {
   }, [carrinho])
 
   const adicionarAoCarrinho = (produto: Produto) => {
-    setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
+    if (produto.id === 1) {
+      // Bolo de Chocolate
+      setBoloDialogOpen(true)
+    } else {
+      setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
+    }
   }
 
   const removerDoCarrinho = (index: number) => {
@@ -112,7 +119,7 @@ export default function CardapioDigital() {
   return (
     <div className="min-h-screen bg-white">
       {/* Background pattern section */}
-      <div className="relative w-auto h-72 bg-repeat" style={{ backgroundImage: "url('/background.PNG')" }}>
+      <div className="relative h-72 bg-repeat" style={{ backgroundImage: "url('/background.PNG')" }}>
         <div className="absolute inset-0 bg-black/10" /> {/* Overlay para melhorar legibilidade */}
         <div className="relative pt-12 pb-8 text-center">
           <h1 className={`${pacifico.className} text-5xl font-bold text-white mb-2 drop-shadow-lg`}>
@@ -207,6 +214,14 @@ export default function CardapioDigital() {
           </div>
         </div>
       </div>
+      <BoloRedondoDialog
+        isOpen={boloDialogOpen}
+        onClose={() => setBoloDialogOpen(false)}
+        onAddToCart={(produto) => {
+          setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
+          setBoloDialogOpen(false)
+        }}
+      />
     </div>
   )
 }
