@@ -6,14 +6,18 @@ import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
+import { Pacifico, Sour_Gummy as Sour_Candy } from 'next/font/google'
 import { Separator } from "@/components/ui/separator"
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
-import { format, addDays } from "date-fns"
+import { format } from "date-fns"
+import { addDays, isBefore } from "date-fns"
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] })
 const sour_candy = Sour_Candy({ weight: "400", subsets: ["latin"] })
+
+// Adicione esta constante no início do arquivo, junto com as outras constantes
+const massas = ["Amanteigada", "Chocolate", "Pão de Ló"]
 
 const tamanhos = [
   { id: "17cm", nome: "17 cm (13 a 15 fatias)", preco: 110 },
@@ -49,33 +53,16 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
-interface Produto {
-  id: number | string
-  nome: string
-  descricao?: string
-  preco: number
-  imagem?: string
-  tamanho?: string
-  recheios?: string[]
-  adicionais?: string[]
-  dataEntrega?: string
-  tipoEntrega?: "retirada" | "entrega"
-  endereco?: {
-    rua: string
-    bairro: string
-    numero: string
-    complemento: string
-  } | null
-}
-
 interface BoloRedondoDialogProps {
   isOpen: boolean
   onClose: () => void
-  onAddToCart: (produto: Produto) => void
+  onAddToCart: (produto: any) => void
 }
 
 export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoDialogProps) {
   const [etapa, setEtapa] = useState(1)
+  // Adicione este estado no componente BoloRedondoDialog
+  const [massaSelecionada, setMassaSelecionada] = useState<string>("")
   const [quantidadeRecheios, setQuantidadeRecheios] = useState<number>(1)
   const [recheiosSelecionados, setRecheiosSelecionados] = useState<string[]>([])
   const [tamanho, setTamanho] = useState<string>("")
@@ -103,10 +90,28 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
     return precoBase + precoRecheiosGourmet + precoAdicionais + (quantidadeRecheios === 2 ? 10 : 0)
   }
 
+  const dataMinima = addDays(new Date(), 4)
+
+  const isFormValid = () => {
+    if (etapa === 1 && !massaSelecionada) return false
+    if (etapa === 2 && quantidadeRecheios === 0) return false
+    if (etapa === 3 && recheiosSelecionados.length === 0) return false
+    if (etapa === 4 && !tamanho) return false
+    if (etapa === 6 && !dataEntrega) return false
+    if (
+      etapa === 7 &&
+      tipoEntrega === "entrega" &&
+      (!endereco.rua || !endereco.bairro || !endereco.numero || !endereco.complemento)
+    )
+      return false
+    return true
+  }
+
   const handleAddToCart = () => {
     const produto = {
       id: `bolo-redondo-${Date.now()}`,
       nome: "Bolo Redondo",
+      massa: massaSelecionada,
       tamanho: tamanhos.find((t) => t.id === tamanho)?.nome,
       recheios: recheiosSelecionados,
       adicionais: adicionaisSelecionados,
@@ -122,6 +127,7 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
 
   const resetForm = () => {
     setEtapa(1)
+    setMassaSelecionada("")
     setQuantidadeRecheios(1)
     setRecheiosSelecionados([])
     setTamanho("")
@@ -129,22 +135,6 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
     setDataEntrega(undefined)
     setTipoEntrega("retirada")
     setEndereco({ rua: "", bairro: "", numero: "", complemento: "" })
-  }
-
-  const dataMinima = addDays(new Date(), 4)
-
-  const isFormValid = () => {
-    if (etapa === 1 && quantidadeRecheios === 0) return false
-    if (etapa === 2 && recheiosSelecionados.length === 0) return false
-    if (etapa === 3 && !tamanho) return false
-    if (etapa === 5 && !dataEntrega) return false
-    if (
-      etapa === 6 &&
-      tipoEntrega === "entrega" &&
-      (!endereco.rua || !endereco.bairro || !endereco.numero || !endereco.complemento)
-    )
-      return false
-    return true
   }
 
   return (
@@ -157,6 +147,26 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
         </DialogHeader>
         <div className="p-6 max-h-[70vh] overflow-y-auto">
           {etapa === 1 && (
+            <div className="space-y-4">
+              <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Escolha a Massa</h3>
+              <RadioGroup
+                value={massaSelecionada}
+                onValueChange={setMassaSelecionada}
+                className="flex flex-col space-y-2"
+              >
+                {massas.map((massa) => (
+                  <div key={massa} className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
+                    <RadioGroupItem value={massa} id={massa} />
+                    <Label htmlFor={massa} className={`${sour_candy.className} text-lg flex-grow`}>
+                      {massa}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            </div>
+          )}
+
+          {etapa === 2 && (
             <div className="space-y-4">
               <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Quantidade de Recheios</h3>
               <RadioGroup
@@ -180,7 +190,7 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
             </div>
           )}
 
-          {etapa === 2 && (
+          {etapa === 3 && (
             <div className="space-y-6">
               <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Escolha os Recheios</h3>
               <div className="space-y-4">
@@ -242,7 +252,7 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
             </div>
           )}
 
-          {etapa === 3 && (
+          {etapa === 4 && (
             <div className="space-y-4">
               <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Escolha o Tamanho</h3>
               <RadioGroup value={tamanho} onValueChange={setTamanho} className="space-y-2">
@@ -259,7 +269,7 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
             </div>
           )}
 
-          {etapa === 4 && (
+          {etapa === 5 && (
             <div className="space-y-4">
               <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Adicionais</h3>
               <div className="grid grid-cols-1 gap-2">
@@ -287,7 +297,7 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
             </div>
           )}
 
-          {etapa === 5 && (
+          {etapa === 6 && (
             <div className="space-y-4">
               <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Data de Entrega</h3>
               <p className={`${sour_candy.className} text-sm text-center text-pink-500`}>
@@ -298,14 +308,14 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
                   mode="single"
                   selected={dataEntrega}
                   onSelect={setDataEntrega}
-                  disabled={(date) => date < dataMinima}
+                  disabled={(date) => isBefore(date, dataMinima)}
                   className="rounded-md border shadow"
                 />
               </div>
             </div>
           )}
 
-          {etapa === 6 && (
+          {etapa === 7 && (
             <div className="space-y-4">
               <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Entrega ou Retirada</h3>
               <RadioGroup
@@ -363,7 +373,7 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
               Voltar
             </Button>
           )}
-          {etapa < 6 ? (
+          {etapa < 7 ? (
             <Button
               onClick={avancarEtapa}
               className="bg-pink-500 hover:bg-pink-600 text-white ml-auto"
@@ -385,4 +395,3 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
     </Dialog>
   )
 }
-

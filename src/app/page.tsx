@@ -9,6 +9,13 @@ import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTr
 import Image from "next/image"
 import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
 import { BoloRedondoDialog } from "@/components/bolos/bolo-redondo-dialog"
+import { BoloRetangularDialog } from "@/components/bolos/bolo-retangular-dialog"
+import { BoloMetroDialog } from "@/components/bolos/bolo-metro-dialog"
+import { BoloAndarDialog } from "@/components/bolos/bolo-andar-dialog"
+import { NakedCakeDialog } from "@/components/bolos/naked-cake-dialog"
+import { BoloPiscinaDialog } from "@/components/bolos/bolo-piscina-dialog"
+import { BoloVulcaoDialog } from "@/components/bolos/bolo-vulcao-dialog"
+import { CupcakeDialog } from "@/components/bolos/cupcake-dialog"
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] })
 const sour_candy = Sour_Candy({ weight: "400", subsets: ["latin"] })
@@ -21,6 +28,7 @@ interface Produto {
   descricao?: string
   preco: number
   imagem?: string
+  massa?: string
   tamanho?: string
   recheios?: string[]
   adicionais?: string[]
@@ -32,6 +40,7 @@ interface Produto {
     numero: string
     complemento: string
   } | null
+  observacao?: string
 }
 
 const produtos: Produto[] = [
@@ -40,28 +49,56 @@ const produtos: Produto[] = [
     nome: "Bolo Redondo",
     descricao: "Varios tipos de bolos redondos, monte o seu",
     preco: 110.0,
-    imagem: "/bolo-chocolate.jpeg",
+    imagem: "/bolo-chocolate.jpg",
   },
   {
     id: 2,
-    nome: "Cupcake de Morango",
-    descricao: "Cupcake fofinho com cobertura de morango",
-    preco: 8.0,
-    imagem: "/cupcake-morango.avif",
+    nome: "Bolo Retangular",
+    descricao: "Bolo retangular de personalizado",
+    preco: 110.0,
+    imagem: "/bolo-retangular.jpg",
   },
   {
     id: 3,
-    nome: "Torta de Limão",
-    descricao: "Torta refrescante de limão com merengue",
-    preco: 40.0,
-    imagem: "/torta-limao.jpg",
+    nome: "Bolo de Metro",
+    descricao: "Meio metro e 1 metro de bolo de personalizado",
+    preco: 600.0,
+    imagem: "/bolo-retangular.jpg",
   },
   {
     id: 4,
-    nome: "Brigadeiro Gourmet",
-    descricao: "Brigadeiro artesanal com chocolate belga",
+    nome: "Bolo de Andar",
+    descricao: "Bolo de 2 ou 3 andares para ocasiões especiais",
+    preco: 450.0,
+    imagem: "/bolo-de-andar.jpg",
+  },
+  {
+    id: 5,
+    nome: "Naked Cake",
+    descricao: "Bolo com cobertura rústica e decoração natural",
+    preco: 120.0,
+    imagem: "/naked-cake.jpg",
+  },
+  {
+    id: 6,
+    nome: "Bolo Piscina",
+    descricao: "Bolo decorado com tema de piscina",
+    preco: 40.0,
+    imagem: "/bolo-piscina.jpg",
+  },
+  {
+    id: 7,
+    nome: "Bolo Vulcão",
+    descricao: "Bolo com cobertura derretida simulando um vulcão",
+    preco: 45.0,
+    imagem: "/bolo-vulcao.jpg",
+  },
+  {
+    id: 8,
+    nome: "Cupcakes",
+    descricao: "Minibolos decorados individualmente",
     preco: 3.5,
-    imagem: "/brigadeiro-gourmet.webp",
+    imagem: "/cupcake.jpg",
   },
 ]
 
@@ -70,6 +107,13 @@ export default function CardapioDigital() {
   const [carrinhoAberto, setCarrinhoAberto] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [boloRedondoDialogOpen, setBoloRedondoDialogOpen] = useState(false)
+  const [boloRetangularDialogOpen, setBoloRetangularDialogOpen] = useState(false)
+  const [boloMetroDialogOpen, setBoloMetroDialogOpen] = useState(false)
+  const [boloAndarDialogOpen, setBoloAndarDialogOpen] = useState(false)
+  const [nakedCakeDialogOpen, setNakedCakeDialogOpen] = useState(false)
+  const [boloPiscinaDialogOpen, setBoloPiscinaDialogOpen] = useState(false)
+  const [boloVulcaoDialogOpen, setBoloVulcaoDialogOpen] = useState(false)
+  const [cupcakeDialogOpen, setCupcakeDialogOpen] = useState(false)
 
   useEffect(() => {
     // Simula o processo de login
@@ -89,8 +133,21 @@ export default function CardapioDigital() {
 
   const adicionarAoCarrinho = (produto: Produto) => {
     if (produto.id === 1) {
-      // Bolo Redondo
       setBoloRedondoDialogOpen(true)
+    } else if (produto.id === 2) {
+      setBoloRetangularDialogOpen(true)
+    } else if (produto.id === 3) {
+      setBoloMetroDialogOpen(true)
+    } else if (produto.id === 4) {
+      setBoloAndarDialogOpen(true)
+    } else if (produto.id === 5) {
+      setNakedCakeDialogOpen(true)
+    } else if (produto.id === 6) {
+      setBoloPiscinaDialogOpen(true)
+    } else if (produto.id === 7) {
+      setBoloVulcaoDialogOpen(true)
+    } else if (produto.id === 8) {
+      setCupcakeDialogOpen(true)
     } else {
       setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
     }
@@ -107,6 +164,10 @@ export default function CardapioDigital() {
     carrinho.forEach((item, index) => {
       mensagem += `${index + 1}. ${item.nome}\n`
       mensagem += `   Preço: R$${item.preco.toFixed(2)}\n`
+
+      if (item.massa) {
+        mensagem += `   Massa: ${item.massa}\n`
+      }
 
       if (item.tamanho) {
         mensagem += `   Tamanho: ${item.tamanho}\n`
@@ -130,6 +191,10 @@ export default function CardapioDigital() {
 
       if (item.endereco) {
         mensagem += `   Endereço de Entrega: ${item.endereco.rua}, ${item.endereco.numero}, ${item.endereco.bairro}, ${item.endereco.complemento}\n`
+      }
+
+      if (item.observacao) {
+        mensagem += `   Observação: ${item.observacao}\n`
       }
 
       mensagem += "\n"
@@ -203,6 +268,7 @@ export default function CardapioDigital() {
                           <X className="h-4 w-4" />
                         </Button>
                       </div>
+                      {item.massa && <p className="text-sm mt-2">Massa: {item.massa}</p>}
                       {item.tamanho && <p className="text-sm mt-2">Tamanho: {item.tamanho}</p>}
                       {item.recheios && item.recheios.length > 0 && (
                         <p className="text-sm mt-1">Recheios: {item.recheios.join(", ")}</p>
@@ -218,6 +284,7 @@ export default function CardapioDigital() {
                           {item.endereco.complemento}
                         </p>
                       )}
+                      {item.observacao && <p className="text-sm mt-1">Observação: {item.observacao}</p>}
                     </div>
                   ))}
                 </ScrollArea>
@@ -235,7 +302,7 @@ export default function CardapioDigital() {
             {produtos.map((produto) => (
               <Card
                 key={produto.id}
-                className="bg-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 rounded-xl overflow-hidden"
+                className="bg-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 rounded-xl overflow-hidden mb-4"
               >
                 <CardHeader className="p-0">
                   <div className="relative h-48 w-full">
@@ -263,7 +330,7 @@ export default function CardapioDigital() {
                       onClick={() => adicionarAoCarrinho(produto)}
                       className="bg-pink-500 hover:bg-pink-600 text-white transition-colors duration-300 rounded-full px-6 py-2"
                     >
-                      {produto.id === 1 ? "Personalizar" : "Adicionar"}
+                      Personalizar
                     </Button>
                   </div>
                 </CardContent>
@@ -278,6 +345,62 @@ export default function CardapioDigital() {
         onAddToCart={(produto) => {
           setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
           setBoloRedondoDialogOpen(false)
+        }}
+      />
+      <BoloRetangularDialog
+        isOpen={boloRetangularDialogOpen}
+        onClose={() => setBoloRetangularDialogOpen(false)}
+        onAddToCart={(produto) => {
+          setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
+          setBoloRetangularDialogOpen(false)
+        }}
+      />
+      <BoloMetroDialog
+        isOpen={boloMetroDialogOpen}
+        onClose={() => setBoloMetroDialogOpen(false)}
+        onAddToCart={(produto) => {
+          setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
+          setBoloMetroDialogOpen(false)
+        }}
+      />
+      <BoloAndarDialog
+        isOpen={boloAndarDialogOpen}
+        onClose={() => setBoloAndarDialogOpen(false)}
+        onAddToCart={(produto) => {
+          setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
+          setBoloAndarDialogOpen(false)
+        }}
+      />
+      <NakedCakeDialog
+        isOpen={nakedCakeDialogOpen}
+        onClose={() => setNakedCakeDialogOpen(false)}
+        onAddToCart={(produto) => {
+          setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
+          setNakedCakeDialogOpen(false)
+        }}
+      />
+      <BoloPiscinaDialog
+        isOpen={boloPiscinaDialogOpen}
+        onClose={() => setBoloPiscinaDialogOpen(false)}
+        onAddToCart={(produto) => {
+          setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
+          setBoloPiscinaDialogOpen(false)
+        }}
+      />
+      <BoloVulcaoDialog
+        isOpen={boloVulcaoDialogOpen}
+        onClose={() => setBoloVulcaoDialogOpen(false)}
+        onAddToCart={(produto) => {
+          setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
+          setBoloVulcaoDialogOpen(false)
+        }}
+      />
+      <CupcakeDialog
+        isOpen={cupcakeDialogOpen}
+        onClose={() => setCupcakeDialogOpen(false)}
+        onAddToCart={(produto) => {
+          setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
+          setCupcakeDialogOpen(false)
         }}
       />
     </div>
