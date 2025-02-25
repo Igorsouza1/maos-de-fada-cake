@@ -49,10 +49,31 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
+interface Produto {
+  id: number | string
+  nome: string
+  descricao?: string
+  preco: number
+  imagem?: string
+  massa?: string
+  tamanho?: string
+  recheios?: string[]
+  adicionais?: string[]
+  dataEntrega?: string
+  tipoEntrega?: "retirada" | "entrega"
+  endereco?: {
+    rua: string
+    bairro: string
+    numero: string
+    complemento: string
+  } | null
+  observacao?: string
+}
+
 interface BoloRetangularDialogProps {
   isOpen: boolean
   onClose: () => void
-  onAddToCart: (produto: any) => void
+  onAddToCart: (produto: Produto) => void
 }
 
 export function BoloRetangularDialog({ isOpen, onClose, onAddToCart }: BoloRetangularDialogProps) {

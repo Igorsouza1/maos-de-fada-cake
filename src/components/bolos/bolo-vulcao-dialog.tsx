@@ -17,10 +17,32 @@ const tamanhos = [
   { id: "gigante", nome: "Gigante", descricao: "Rende de 20 a 25 fatias", preco: 80 },
 ]
 
+interface Produto {
+  id: number | string
+  nome: string
+  descricao?: string
+  preco: number
+  imagem?: string
+  massa?: string
+  tamanho?: string
+  recheios?: string[]
+  adicionais?: string[]
+  dataEntrega?: string
+  tipoEntrega?: "retirada" | "entrega"
+  endereco?: {
+    rua: string
+    bairro: string
+    numero: string
+    complemento: string
+  } | null
+  observacao?: string
+}
+
+
 interface BoloVulcaoDialogProps {
   isOpen: boolean
   onClose: () => void
-  onAddToCart: (produto: any) => void
+  onAddToCart: (produto: Produto) => void
 }
 
 export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDialogProps) {
