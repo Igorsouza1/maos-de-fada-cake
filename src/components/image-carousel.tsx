@@ -6,25 +6,35 @@ import { ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 interface ImageCarouselProps {
-  images: { src: string; alt: string; description: string }[]
-  onDescriptionChange: (description: string) => void
+  images: { src: string; alt: string; description: string; name: string; price: number }[]
+  onImageChange: (image: { description: string; name: string; price: number }) => void
 }
 
-export function ImageCarousel({ images, onDescriptionChange }: ImageCarouselProps) {
+export function ImageCarousel({ images, onImageChange }: ImageCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
 
   const nextImage = () => {
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length)
-    onDescriptionChange(images[(currentIndex + 1) % images.length].description)
+    const newIndex = (currentIndex + 1) % images.length
+    setCurrentIndex(newIndex)
+    onImageChange({
+      description: images[newIndex].description,
+      name: images[newIndex].name,
+      price: images[newIndex].price,
+    })
   }
 
   const prevImage = () => {
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + images.length) % images.length)
-    onDescriptionChange(images[(currentIndex - 1 + images.length) % images.length].description)
+    const newIndex = (currentIndex - 1 + images.length) % images.length
+    setCurrentIndex(newIndex)
+    onImageChange({
+      description: images[newIndex].description,
+      name: images[newIndex].name,
+      price: images[newIndex].price,
+    })
   }
 
   return (
-    <div className="relative h-72 w-full">
+    <div className="relative h-48 w-full">
       <Image
         src={images[currentIndex].src || "/placeholder.svg"}
         alt={images[currentIndex].alt}

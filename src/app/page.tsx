@@ -25,9 +25,9 @@ export const runtime = "edge"
 interface Produto {
   id: string
   nome: string
-  descricao?: string
+  descricao: string
   preco: number
-  imagens: { src: string; alt: string; description: string }[]
+  imagens: { src: string; alt: string; description: string; name: string; price: number }[]
   massa?: string
   tamanho?: string
   recheios?: string[]
@@ -52,9 +52,27 @@ const produtos: Produto[] = [
     descricao: "Varios tipos de bolos redondos, monte o seu",
     preco: 110.0,
     imagens: [
-      { src: "/redondo-17.jpeg", alt: "Bolo redondo 17cm", description: "Bolo redondo 17cm" },
-      { src: "/redondo-23.jpeg", alt: "Bolo redondo 23cm", description: "Bolo redondo 23cm" },
-      { src: "/redondo-28.jpeg", alt: "Bolo redondo 28cm", description: "Bolo redondo 28cm" },
+      {
+        src: "/redondo-17.jpeg",
+        alt: "Bolo redondo 17cm",
+        description: "Bolo redondo 17cm",
+        name: "Bolo Redondo 17cm",
+        price: 110.0,
+      },
+      {
+        src: "/redondo-23.jpeg",
+        alt: "Bolo redondo 23cm",
+        description: "Bolo redondo 23cm",
+        name: "Bolo Redondo 23cm",
+        price: 180.0,
+      },
+      {
+        src: "/redondo-28.jpeg",
+        alt: "Bolo redondo 28cm",
+        description: "Bolo redondo 28cm",
+        name: "Bolo Redondo 28cm",
+        price: 270.0,
+      },
     ],
   },
   {
@@ -62,9 +80,28 @@ const produtos: Produto[] = [
     nome: "Bolo Retangular",
     descricao: "Bolo retangular personalizado",
     preco: 110.0,
-    imagens: [{ src: "/retangular-25.jpeg", alt: "Bolo Retangular 25cm", description: "Bolo Retangular 25cm" },
-      { src: "/retangular-33.jpeg", alt: "Bolo Retangular 33cm", description: "Bolo Retangular 33cm" },
-      { src: "/retangular-40.jpeg", alt: "Bolo Retangular 40cm", description: "Bolo Retangular 40cm" }
+    imagens: [
+      {
+        src: "/retangular-25.jpeg",
+        alt: "Bolo Retangular 25cm",
+        description: "Bolo Retangular 25cm",
+        name: "Bolo Retangular 25cm",
+        price: 110.0,
+      },
+      {
+        src: "/retangular-33.jpeg",
+        alt: "Bolo Retangular 33cm",
+        description: "Bolo Retangular 33cm",
+        name: "Bolo Retangular 33cm",
+        price: 180.0,
+      },
+      {
+        src: "/retangular-40.jpeg",
+        alt: "Bolo Retangular 40cm",
+        description: "Bolo Retangular 40cm",
+        name: "Bolo Retangular 40cm",
+        price: 270.0,
+      },
     ],
   },
   {
@@ -72,8 +109,21 @@ const produtos: Produto[] = [
     nome: "Bolo de Metro",
     descricao: "Meio metro e 1 metro de bolo personalizado",
     preco: 600.0,
-    imagens: [{ src: "/meio-metro.jpeg", alt: "Bolo meio metro", description: "Bolo meio metro" },
-      { src: "/um-metro.jpeg", alt: "Bolo um metro", description: "Bolo um metro" }
+    imagens: [
+      {
+        src: "/meio-metro.jpeg",
+        alt: "Bolo meio metro",
+        description: "Bolo meio metro",
+        name: "Bolo Meio Metro",
+        price: 600.0,
+      },
+      {
+        src: "/um-metro.jpeg",
+        alt: "Bolo um metro",
+        description: "Bolo um metro",
+        name: "Bolo Um Metro",
+        price: 900.0,
+      },
     ],
   },
   {
@@ -82,7 +132,13 @@ const produtos: Produto[] = [
     descricao: "Bolo de 2 ou 3 andares para ocasiões especiais",
     preco: 450.0,
     imagens: [
-      { src: "/bolo-de-andar.jpg", alt: "Bolo de Andar", description: "Bolo de andar para casamentos e festas" },
+      {
+        src: "/bolo-de-andar.jpg",
+        alt: "Bolo de Andar",
+        description: "Bolo de andar para casamentos e festas",
+        name: "Bolo de Andar",
+        price: 450.0,
+      },
     ],
   },
   {
@@ -90,14 +146,30 @@ const produtos: Produto[] = [
     nome: "Naked Cake",
     descricao: "Bolo com cobertura rústica e decoração natural",
     preco: 120.0,
-    imagens: [{ src: "/naked-cake.jpg", alt: "Naked Cake", description: "Naked cake com frutas frescas" }],
+    imagens: [
+      {
+        src: "/naked-cake.jpg",
+        alt: "Naked Cake",
+        description: "Naked cake com frutas frescas",
+        name: "Naked Cake",
+        price: 120.0,
+      },
+    ],
   },
   {
     id: "6",
     nome: "Bolo Piscina",
     descricao: "Bolo decorado com tema de piscina",
-    preco: 40.0,
-    imagens: [{ src: "/bolo-piscina.jpg", alt: "Bolo Piscina", description: "Bolo piscina para festas de verão" }],
+    preco: 45.0,
+    imagens: [
+      {
+        src: "/bolo-piscina.jpg",
+        alt: "Bolo Piscina",
+        description: "Bolo piscina para festas de verão",
+        name: "Bolo Piscina",
+        price: 45.0,
+      },
+    ],
   },
   {
     id: "7",
@@ -105,8 +177,20 @@ const produtos: Produto[] = [
     descricao: "Bolo com cobertura derretida simulando um vulcão",
     preco: 45.0,
     imagens: [
-      { src: "/bolo-vulcao-tradicional.jpg", alt: "Bolo Vulcão Tradicional", description: "Bolo vulcão tradicional" },
-      { src: "/bolo-vulcao-gigante.jpg", alt: "Bolo Vulcão Gigante", description: "Bolo vulcão gigante" },
+      {
+        src: "/bolo-vulcao-tradicional.jpg",
+        alt: "Bolo Vulcão Tradicional",
+        description: "Bolo vulcão tradicional",
+        name: "Bolo Vulcão Tradicional",
+        price: 45.0,
+      },
+      {
+        src: "/bolo-vulcao-gigante.jpg",
+        alt: "Bolo Vulcão Gigante",
+        description: "Bolo vulcão gigante",
+        name: "Bolo Vulcão Gigante",
+        price: 75.0,
+      },
     ],
   },
   {
@@ -115,8 +199,20 @@ const produtos: Produto[] = [
     descricao: "Minibolos decorados individualmente",
     preco: 3.5,
     imagens: [
-      { src: "/cupcake-simples.jpg", alt: "Cupcake Simples", description: "Cupcake simples" },
-      { src: "/cupcake-recheado.jpg", alt: "Cupcake Recheado", description: "Cupcake recheado" },
+      {
+        src: "/cupcake-simples.jpg",
+        alt: "Cupcake Simples",
+        description: "Cupcake simples",
+        name: "Cupcake Simples",
+        price: 3.5,
+      },
+      {
+        src: "/cupcake-recheado.jpg",
+        alt: "Cupcake Recheado",
+        description: "Cupcake recheado",
+        name: "Cupcake Recheado",
+        price: 5.0,
+      },
     ],
   },
 ]
@@ -133,7 +229,9 @@ export default function CardapioDigital() {
   const [boloPiscinaDialogOpen, setBoloPiscinaDialogOpen] = useState(false)
   const [boloVulcaoDialogOpen, setBoloVulcaoDialogOpen] = useState(false)
   const [cupcakeDialogOpen, setCupcakeDialogOpen] = useState(false)
-  const [produtoDescricoes, setProdutoDescricoes] = useState<{ [key: string]: string }>({})
+  const [produtoInfo, setProdutoInfo] = useState<{
+    [key: string]: { name: string; price: number; description: string }
+  }>({})
 
   useEffect(() => {
     // Simula o processo de login
@@ -322,26 +420,24 @@ export default function CardapioDigital() {
             {produtos.map((produto) => (
               <Card
                 key={produto.id}
-                className="bg-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 rounded-xl overflow-hidden"
+                className="mb-8 bg-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 rounded-xl overflow-hidden"
               >
                 <CardHeader className="p-0">
                   <ImageCarousel
                     images={produto.imagens}
-                    onDescriptionChange={(description) =>
-                      setProdutoDescricoes({ ...produtoDescricoes, [produto.id]: description })
-                    }
+                    onImageChange={(info) => setProdutoInfo({ ...produtoInfo, [produto.id]: info })}
                   />
                 </CardHeader>
                 <CardContent className="p-6">
                   <CardTitle className={`${pacifico.className} text-2xl font-bold text-pink-700 mb-2`}>
-                    {produto.nome}
+                    {produtoInfo[produto.id]?.name || produto.nome}
                   </CardTitle>
                   <CardDescription className={`${sour_candy.className} text-pink-500 mb-4`}>
-                    {produtoDescricoes[produto.id] || produto.descricao}
+                    {produto.descricao}
                   </CardDescription>
                   <div className="flex justify-between items-center">
                     <span className={`${sour_candy.className} text-2xl font-semibold text-pink-600`}>
-                      R${produto.preco.toFixed(2)}
+                      R${(produtoInfo[produto.id]?.price || produto.preco).toFixed(2)}
                     </span>
                     <Button
                       onClick={() => adicionarAoCarrinho(produto)}
