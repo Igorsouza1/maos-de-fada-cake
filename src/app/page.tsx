@@ -11,7 +11,7 @@ import { BoloRedondoDialog } from "@/components/bolos/bolo-redondo-dialog"
 import { BoloRetangularDialog } from "@/components/bolos/bolo-retangular-dialog"
 import { BoloMetroDialog } from "@/components/bolos/bolo-metro-dialog"
 import { BoloAndarDialog } from "@/components/bolos/bolo-andar-dialog"
-import { NakedCakeDialog } from "@/components/bolos/naked-cake-dialog"
+import { BoloAcetatoDialog } from "@/components/bolos/bolo-acetato-dialog"
 import { BoloPiscinaDialog } from "@/components/bolos/bolo-piscina-dialog"
 import { BoloVulcaoDialog } from "@/components/bolos/bolo-vulcao-dialog"
 import { CupcakeDialog } from "@/components/bolos/cupcake-dialog"
@@ -25,7 +25,7 @@ export const runtime = "edge"
 interface Produto {
   id: string
   nome: string
-  descricao: string
+  descricao?: string // Make descricao optional
   preco: number
   imagens: { src: string; alt: string; description: string; name: string; price: number }[]
   massa?: string
@@ -43,6 +43,7 @@ interface Produto {
   observacao?: string
   quantidade?: number
   tipo?: string
+  cobertura?: string // Add this for Bolo Piscina
 }
 
 const produtos: Produto[] = [
@@ -143,15 +144,15 @@ const produtos: Produto[] = [
   },
   {
     id: "5",
-    nome: "Naked Cake",
-    descricao: "Bolo com cobertura rústica e decoração natural",
+    nome: "Bolo no Acetato",
+    descricao: "Bolo decorado em acetato para ocasiões especiais",
     preco: 120.0,
     imagens: [
       {
-        src: "/naked-cake.jpg",
-        alt: "Naked Cake",
-        description: "Naked cake com frutas frescas",
-        name: "Naked Cake",
+        src: "/bolo-acetato.jpg",
+        alt: "Bolo no Acetato",
+        description: "Bolo no Acetato decorado",
+        name: "Bolo no Acetato",
         price: 120.0,
       },
     ],
@@ -160,14 +161,14 @@ const produtos: Produto[] = [
     id: "6",
     nome: "Bolo Piscina",
     descricao: "Bolo decorado com tema de piscina",
-    preco: 45.0,
+    preco: 40.0,
     imagens: [
       {
         src: "/bolo-piscina.jpg",
         alt: "Bolo Piscina",
         description: "Bolo piscina para festas de verão",
         name: "Bolo Piscina",
-        price: 45.0,
+        price: 40.0,
       },
     ],
   },
@@ -225,10 +226,11 @@ export default function CardapioDigital() {
   const [boloRetangularDialogOpen, setBoloRetangularDialogOpen] = useState(false)
   const [boloMetroDialogOpen, setBoloMetroDialogOpen] = useState(false)
   const [boloAndarDialogOpen, setBoloAndarDialogOpen] = useState(false)
-  const [nakedCakeDialogOpen, setNakedCakeDialogOpen] = useState(false)
+  const [boloAcetatoDialogOpen, setBoloAcetatoDialogOpen] = useState(false)
   const [boloPiscinaDialogOpen, setBoloPiscinaDialogOpen] = useState(false)
   const [boloVulcaoDialogOpen, setBoloVulcaoDialogOpen] = useState(false)
   const [cupcakeDialogOpen, setCupcakeDialogOpen] = useState(false)
+  const [produtoDescricoes, setProdutoDescricoes] = useState<{ [key: string]: string }>({})
   const [produtoInfo, setProdutoInfo] = useState<{
     [key: string]: { name: string; price: number; description: string }
   }>({})
@@ -259,7 +261,7 @@ export default function CardapioDigital() {
     } else if (produto.id === "4") {
       setBoloAndarDialogOpen(true)
     } else if (produto.id === "5") {
-      setNakedCakeDialogOpen(true)
+      setBoloAcetatoDialogOpen(true)
     } else if (produto.id === "6") {
       setBoloPiscinaDialogOpen(true)
     } else if (produto.id === "7") {
@@ -420,7 +422,7 @@ export default function CardapioDigital() {
             {produtos.map((produto) => (
               <Card
                 key={produto.id}
-                className="mb-8 bg-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 rounded-xl overflow-hidden"
+                className="bg-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 rounded-xl overflow-hidden"
               >
                 <CardHeader className="p-0">
                   <ImageCarousel
@@ -484,19 +486,19 @@ export default function CardapioDigital() {
           setBoloAndarDialogOpen(false)
         }}
       />
-      <NakedCakeDialog
-        isOpen={nakedCakeDialogOpen}
-        onClose={() => setNakedCakeDialogOpen(false)}
+      <BoloAcetatoDialog
+        isOpen={boloAcetatoDialogOpen}
+        onClose={() => setBoloAcetatoDialogOpen(false)}
         onAddToCart={(produto) => {
           setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
-          setNakedCakeDialogOpen(false)
+          setBoloAcetatoDialogOpen(false)
         }}
       />
       <BoloPiscinaDialog
         isOpen={boloPiscinaDialogOpen}
         onClose={() => setBoloPiscinaDialogOpen(false)}
         onAddToCart={(produto) => {
-          setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
+          setCarrinho((prevCarrinho) => [...prevCarrinho, { ...produto, descricao: "Bolo piscina decorado" }])
           setBoloPiscinaDialogOpen(false)
         }}
       />
