@@ -344,7 +344,7 @@ export default function CardapioDigital() {
     return (
       <div
         className="min-h-screen flex items-center justify-center bg-repeat"
-        style={{ backgroundImage: "url('/background.PNG')" }}
+        style={{ backgroundImage: "url('/backgrund.jpg')" }}
       >
         <div className="text-center">
           <h1 className={`${pacifico.className} text-4xl text-pink-900 mb-4 drop-shadow-md`}>Mãos de Fada Cake</h1>
@@ -357,18 +357,20 @@ export default function CardapioDigital() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Background pattern section */}
-      <div className="relative h-72 bg-repeat" style={{ backgroundImage: "url('/background.PNG')" }}>
-        <div className="absolute inset-0 bg-black/10" /> {/* Overlay para melhorar legibilidade */}
-        <div className="relative pt-12 pb-8 text-center">
-          <h1 className={`${pacifico.className} text-5xl font-bold text-white mb-2 drop-shadow-lg`}>
-            Mãos de Fada Cake
-          </h1>
-          <p className={`${sour_candy.className} text-white italic text-lg drop-shadow-md`}>
-            Delícias artesanais para adoçar seu dia
-          </p>
-        </div>
-      </div>
+  {/* Background pattern section */}
+  <div className="relative h-72 bg-repeat" style={{ backgroundImage: "url('/backgrund.jpg')" }}>
+    {/* Camada de preto bem leve sem afetar as letras */}
+    <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-transparent" />
+    
+    <div className="relative pt-12 pb-8 text-center">
+      <h1 className={`${pacifico.className} text-5xl font-bold text-white mb-2 drop-shadow-lg`}>
+        Mãos de Fada Cake
+      </h1>
+      <p className={`${sour_candy.className} text-white italic text-lg drop-shadow-md`}>
+        Delícias artesanais para adoçar seu dia
+      </p>
+    </div>
+  </div>
 
       {/* Content section that overlaps with the background */}
       <div className="relative -mt-20 px-4">
