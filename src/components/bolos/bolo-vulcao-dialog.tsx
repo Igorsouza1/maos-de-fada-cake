@@ -30,7 +30,7 @@ interface Produto {
   massa: string
   preco: number
   dataEntrega: string
-  imagens: { src: string; alt: string; description: string }[]
+  imagens: { src: string; alt: string; description: string; name: string; price: number }[]
 }
 
 interface BoloVulcaoDialogProps {
@@ -60,7 +60,15 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
       massa: massa,
       preco: tamanhoSelecionado.preco,
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
-      imagens: [{ src: "/bolo-vulcao.jpg", alt: "Bolo Vulcão", description: `Bolo Vulcão ${tamanhoSelecionado.nome}` }],
+      imagens: [
+        {
+          src: "/bolo-vulcao.jpg",
+          alt: "Bolo Vulcão",
+          description: `Bolo Vulcão ${tamanhoSelecionado.nome}`,
+          name: `Bolo Vulcão ${tamanhoSelecionado.nome}`,
+          price: tamanhoSelecionado.preco,
+        },
+      ],
     }
     onAddToCart(produto)
     onClose()

@@ -29,7 +29,7 @@ interface Produto {
   preco: number
   quantidade: number
   dataEntrega: string
-  imagens: { src: string; alt: string; description: string }[]
+  imagens: { src: string; alt: string; description: string; name: string; price: number }[]
 }
 
 interface CupcakeDialogProps {
@@ -59,7 +59,15 @@ export function CupcakeDialog({ isOpen, onClose, onAddToCart }: CupcakeDialogPro
       preco: tipoSelecionado.preco * Number.parseInt(quantidade),
       quantidade: Number.parseInt(quantidade),
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
-      imagens: [{ src: "/cupcake.jpg", alt: "Cupcake", description: `Cupcake ${tipoSelecionado.nome}` }],
+      imagens: [
+        {
+          src: "/cupcake.jpg",
+          alt: "Cupcake",
+          description: `Cupcake ${tipoSelecionado.nome}`,
+          name: `Cupcake ${tipoSelecionado.nome}`,
+          price: tipoSelecionado.preco,
+        },
+      ],
     }
     onAddToCart(produto)
     onClose()

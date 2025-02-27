@@ -7,15 +7,27 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
 import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
-import { BoloRedondoDialog } from "@/components/bolos/bolo-redondo-dialog"
-import { BoloRetangularDialog } from "@/components/bolos/bolo-retangular-dialog"
-import { BoloMetroDialog } from "@/components/bolos/bolo-metro-dialog"
-import { BoloAndarDialog } from "@/components/bolos/bolo-andar-dialog"
-import { BoloAcetatoDialog } from "@/components/bolos/bolo-acetato-dialog"
-import { BoloPiscinaDialog } from "@/components/bolos/bolo-piscina-dialog"
-import { BoloVulcaoDialog } from "@/components/bolos/bolo-vulcao-dialog"
-import { CupcakeDialog } from "@/components/bolos/cupcake-dialog"
-import { ImageCarousel } from "@/components/image-carousel"
+import dynamic from "next/dynamic"
+import {ImageCarousel} from "@/components/image-carousel" // Import ImageCarousel
+
+const BoloRedondoDialog = dynamic(() =>
+  import("@/components/bolos/bolo-redondo-dialog").then((mod) => mod.BoloRedondoDialog),
+)
+const BoloRetangularDialog = dynamic(() =>
+  import("@/components/bolos/bolo-retangular-dialog").then((mod) => mod.BoloRetangularDialog),
+)
+const BoloMetroDialog = dynamic(() => import("@/components/bolos/bolo-metro-dialog").then((mod) => mod.BoloMetroDialog))
+const BoloAndarDialog = dynamic(() => import("@/components/bolos/bolo-andar-dialog").then((mod) => mod.BoloAndarDialog))
+const BoloAcetatoDialog = dynamic(() =>
+  import("@/components/bolos/bolo-acetato-dialog").then((mod) => mod.BoloAcetatoDialog),
+)
+const BoloPiscinaDialog = dynamic(() =>
+  import("@/components/bolos/bolo-piscina-dialog").then((mod) => mod.BoloPiscinaDialog),
+)
+const BoloVulcaoDialog = dynamic(() =>
+  import("@/components/bolos/bolo-vulcao-dialog").then((mod) => mod.BoloVulcaoDialog),
+)
+const CupcakeDialog = dynamic(() => import("@/components/bolos/cupcake-dialog").then((mod) => mod.CupcakeDialog))
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] })
 const sour_candy = Sour_Candy({ weight: "400", subsets: ["latin"] })
@@ -498,7 +510,7 @@ export default function CardapioDigital() {
         isOpen={boloPiscinaDialogOpen}
         onClose={() => setBoloPiscinaDialogOpen(false)}
         onAddToCart={(produto) => {
-          setCarrinho((prevCarrinho) => [...prevCarrinho, { ...produto, descricao: "Bolo piscina decorado" }])
+          setCarrinho((prevCarrinho) => [...prevCarrinho, produto as Produto])
           setBoloPiscinaDialogOpen(false)
         }}
       />
@@ -506,7 +518,7 @@ export default function CardapioDigital() {
         isOpen={boloVulcaoDialogOpen}
         onClose={() => setBoloVulcaoDialogOpen(false)}
         onAddToCart={(produto) => {
-          setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
+          setCarrinho((prevCarrinho) => [...prevCarrinho, produto as Produto])
           setBoloVulcaoDialogOpen(false)
         }}
       />
@@ -514,7 +526,7 @@ export default function CardapioDigital() {
         isOpen={cupcakeDialogOpen}
         onClose={() => setCupcakeDialogOpen(false)}
         onAddToCart={(produto) => {
-          setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
+          setCarrinho((prevCarrinho) => [...prevCarrinho, produto as Produto])
           setCupcakeDialogOpen(false)
         }}
       />

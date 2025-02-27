@@ -19,13 +19,12 @@ const coberturas = ["Chocolate", "Leite Ninho", "Mousse de Maracujá"]
 interface Produto {
   id: string
   nome: string
-  descricao: string
   tamanho: string
   massa: string
   cobertura: string
   preco: number
   dataEntrega: string
-  imagens: { src: string; alt: string; description: string }[]
+  imagens: { src: string; alt: string; description: string; name: string; price: number }[]
 }
 
 interface BoloPiscinaDialogProps {
@@ -47,12 +46,19 @@ export function BoloPiscinaDialog({ isOpen, onClose, onAddToCart }: BoloPiscinaD
       id: `bolo-piscina-${Date.now()}`,
       nome: "Bolo Piscina",
       tamanho: "Rende de 15 a 20 fatias",
-      descricao: "",
       massa: massa,
       cobertura: cobertura,
       preco: 40.0,
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
-      imagens: [{ src: "/bolo-piscina.jpg", alt: "Bolo Piscina", description: "Bolo Piscina Decorado" }],
+      imagens: [
+        {
+          src: "/bolo-piscina.jpg",
+          alt: "Bolo Piscina",
+          description: "Bolo piscina para festas de verão",
+          name: "Bolo Piscina",
+          price: 40.0,
+        },
+      ],
     }
     onAddToCart(produto)
     onClose()
