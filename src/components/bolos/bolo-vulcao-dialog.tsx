@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Calendar } from "@/components/ui/calendar"
-import { Pacifico, Sour_Gummy as Sour_Candy } from 'next/font/google'
+import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
 import { format, addDays, isBefore } from "date-fns"
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] })
@@ -18,26 +18,13 @@ const tamanhos = [
 ]
 
 interface Produto {
-  id: number | string
+  id: string
   nome: string
-  descricao?: string
+  tamanho: string
   preco: number
-  imagem?: string
-  massa?: string
-  tamanho?: string
-  recheios?: string[]
-  adicionais?: string[]
-  dataEntrega?: string
-  tipoEntrega?: "retirada" | "entrega"
-  endereco?: {
-    rua: string
-    bairro: string
-    numero: string
-    complemento: string
-  } | null
-  observacao?: string
+  dataEntrega: string
+  imagens: { src: string; alt: string; description: string }[]
 }
-
 
 interface BoloVulcaoDialogProps {
   isOpen: boolean
@@ -55,12 +42,13 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
     const tamanhoSelecionado = tamanhos.find((t) => t.id === tamanho)
     if (!tamanhoSelecionado) return
 
-    const produto = {
+    const produto: Produto = {
       id: `bolo-vulcao-${Date.now()}`,
       nome: `Bolo Vulcão ${tamanhoSelecionado.nome}`,
       tamanho: tamanhoSelecionado.descricao,
       preco: tamanhoSelecionado.preco,
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
+      imagens: [{ src: "/bolo-vulcao.jpg", alt: "Bolo Vulcão", description: `Bolo Vulcão ${tamanhoSelecionado.nome}` }],
     }
     onAddToCart(produto)
     onClose()
@@ -126,3 +114,4 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
     </Dialog>
   )
 }
+

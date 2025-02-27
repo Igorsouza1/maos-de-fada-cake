@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Pacifico, Sour_Gummy as Sour_Candy } from 'next/font/google'
+import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
 import { Separator } from "@/components/ui/separator"
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
@@ -47,32 +47,24 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
-interface Produto {
-  id: number | string
-  nome: string
-  descricao?: string
-  preco: number
-  imagem?: string
-  massa?: string
-  tamanho?: string
-  recheios?: string[]
-  adicionais?: string[]
-  dataEntrega?: string
-  tipoEntrega?: "retirada" | "entrega"
-  endereco?: {
-    rua: string
-    bairro: string
-    numero: string
-    complemento: string
-  } | null
-  observacao?: string
-}
-
-
 interface BoloMetroDialogProps {
   isOpen: boolean
   onClose: () => void
-  onAddToCart: (produto: Produto) => void
+  onAddToCart: (produto: any) => void
+}
+
+interface Produto {
+  id: string
+  nome: string
+  tamanho: string | undefined
+  massa: string
+  recheios: string[]
+  adicionais: string[]
+  preco: number
+  dataEntrega: string
+  tipoEntrega: "retirada" | "entrega"
+  endereco: { rua: string; bairro: string; numero: string; complemento: string } | null
+  imagens: { src: string; alt: string; description: string }[]
 }
 
 export function BoloMetroDialog({ isOpen, onClose, onAddToCart }: BoloMetroDialogProps) {
@@ -108,7 +100,7 @@ export function BoloMetroDialog({ isOpen, onClose, onAddToCart }: BoloMetroDialo
   const dataMinima = addDays(new Date(), 4)
 
   const handleAddToCart = () => {
-    const produto = {
+    const produto: Produto = {
       id: `bolo-metro-${Date.now()}`,
       nome: "Bolo de Metro",
       tamanho: tamanhos.find((t) => t.id === tamanho)?.nome,
@@ -119,6 +111,7 @@ export function BoloMetroDialog({ isOpen, onClose, onAddToCart }: BoloMetroDialo
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       tipoEntrega,
       endereco: tipoEntrega === "entrega" ? endereco : null,
+      imagens: [{ src: "/bolo-metro.jpg", alt: "Bolo de Metro", description: "Bolo de Metro Personalizado" }],
     }
     onAddToCart(produto)
     onClose()
@@ -410,3 +403,4 @@ export function BoloMetroDialog({ isOpen, onClose, onAddToCart }: BoloMetroDialo
     </Dialog>
   )
 }
+

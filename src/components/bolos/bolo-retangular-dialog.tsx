@@ -49,31 +49,24 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
-interface Produto {
-  id: number | string
-  nome: string
-  descricao?: string
-  preco: number
-  imagem?: string
-  massa?: string
-  tamanho?: string
-  recheios?: string[]
-  adicionais?: string[]
-  dataEntrega?: string
-  tipoEntrega?: "retirada" | "entrega"
-  endereco?: {
-    rua: string
-    bairro: string
-    numero: string
-    complemento: string
-  } | null
-  observacao?: string
-}
-
 interface BoloRetangularDialogProps {
   isOpen: boolean
   onClose: () => void
-  onAddToCart: (produto: Produto) => void
+  onAddToCart: (produto: any) => void
+}
+
+interface Produto {
+  id: string
+  nome: string
+  massa: string
+  tamanho: string | undefined
+  recheios: string[]
+  adicionais: string[]
+  preco: number
+  dataEntrega: string
+  tipoEntrega: "retirada" | "entrega"
+  endereco: { rua: string; bairro: string; numero: string; complemento: string } | null
+  imagens: { src: string; alt: string; description: string }[]
 }
 
 export function BoloRetangularDialog({ isOpen, onClose, onAddToCart }: BoloRetangularDialogProps) {
@@ -109,7 +102,7 @@ export function BoloRetangularDialog({ isOpen, onClose, onAddToCart }: BoloRetan
   const dataMinima = addDays(new Date(), 4)
 
   const handleAddToCart = () => {
-    const produto = {
+    const produto: Produto = {
       id: `bolo-retangular-${Date.now()}`,
       nome: "Bolo Retangular",
       massa: massaSelecionada,
@@ -120,6 +113,7 @@ export function BoloRetangularDialog({ isOpen, onClose, onAddToCart }: BoloRetan
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       tipoEntrega,
       endereco: tipoEntrega === "entrega" ? endereco : null,
+      imagens: [{ src: "/bolo-retangular.jpg", alt: "Bolo Retangular", description: "Bolo Retangular Personalizado" }],
     }
     onAddToCart(produto)
     onClose()

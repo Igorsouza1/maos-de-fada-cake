@@ -4,33 +4,20 @@ import { useState } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
-import { Pacifico, Sour_Gummy as Sour_Candy } from 'next/font/google'
+import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
 import { format, addDays, isBefore } from "date-fns"
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] })
 const sour_candy = Sour_Candy({ weight: "400", subsets: ["latin"] })
 
 interface Produto {
-  id: number | string
+  id: string
   nome: string
-  descricao?: string
+  tamanho: string
   preco: number
-  imagem?: string
-  massa?: string
-  tamanho?: string
-  recheios?: string[]
-  adicionais?: string[]
-  dataEntrega?: string
-  tipoEntrega?: "retirada" | "entrega"
-  endereco?: {
-    rua: string
-    bairro: string
-    numero: string
-    complemento: string
-  } | null
-  observacao?: string
+  dataEntrega: string
+  imagens: { src: string; alt: string; description: string }[]
 }
-
 
 interface BoloPiscinaDialogProps {
   isOpen: boolean
@@ -44,12 +31,13 @@ export function BoloPiscinaDialog({ isOpen, onClose, onAddToCart }: BoloPiscinaD
   const dataMinima = addDays(new Date(), 4)
 
   const handleAddToCart = () => {
-    const produto = {
+    const produto: Produto = {
       id: `bolo-piscina-${Date.now()}`,
       nome: "Bolo Piscina",
       tamanho: "Rende de 15 a 20 fatias",
       preco: 40.0,
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
+      imagens: [{ src: "/bolo-piscina.jpg", alt: "Bolo Piscina", description: "Bolo Piscina Decorado" }],
     }
     onAddToCart(produto)
     onClose()
@@ -65,12 +53,8 @@ export function BoloPiscinaDialog({ isOpen, onClose, onAddToCart }: BoloPiscinaD
           </DialogTitle>
         </DialogHeader>
         <div className="p-6 space-y-4">
-          <p className={`${sour_candy.className} text-lg text-pink-600 text-center`}>
-            Rende de 15 a 20 fatias
-          </p>
-          <p className={`${sour_candy.className} text-xl font-semibold text-pink-700 text-center`}>
-            Preço: R$40,00
-          </p>
+          <p className={`${sour_candy.className} text-lg text-pink-600 text-center`}>Rende de 15 a 20 fatias</p>
+          <p className={`${sour_candy.className} text-xl font-semibold text-pink-700 text-center`}>Preço: R$40,00</p>
           <div className="space-y-4">
             <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Data de Entrega</h3>
             <p className={`${sour_candy.className} text-sm text-center text-pink-500`}>
@@ -100,3 +84,4 @@ export function BoloPiscinaDialog({ isOpen, onClose, onAddToCart }: BoloPiscinaD
     </Dialog>
   )
 }
+

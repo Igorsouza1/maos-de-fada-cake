@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Pacifico, Sour_Gummy as Sour_Candy } from 'next/font/google'
+import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
 import { Separator } from "@/components/ui/separator"
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
@@ -53,31 +53,24 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
-interface Produto {
-  id: number | string
-  nome: string
-  descricao?: string
-  preco: number
-  imagem?: string
-  massa?: string
-  tamanho?: string
-  recheios?: string[]
-  adicionais?: string[]
-  dataEntrega?: string
-  tipoEntrega?: "retirada" | "entrega"
-  endereco?: {
-    rua: string
-    bairro: string
-    numero: string
-    complemento: string
-  } | null
-  observacao?: string
-}
-
 interface BoloRedondoDialogProps {
   isOpen: boolean
   onClose: () => void
-  onAddToCart: (produto: Produto) => void
+  onAddToCart: (produto: any) => void
+}
+
+interface Produto {
+  id: string
+  nome: string
+  massa: string
+  tamanho: string | undefined
+  recheios: string[]
+  adicionais: string[]
+  preco: number
+  dataEntrega: string
+  tipoEntrega: "retirada" | "entrega"
+  endereco: { rua: string; bairro: string; numero: string; complemento: string } | null
+  imagens: { src: string; alt: string; description: string }[]
 }
 
 export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoDialogProps) {
@@ -129,7 +122,7 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
   }
 
   const handleAddToCart = () => {
-    const produto = {
+    const produto: Produto = {
       id: `bolo-redondo-${Date.now()}`,
       nome: "Bolo Redondo",
       massa: massaSelecionada,
@@ -140,6 +133,7 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       tipoEntrega,
       endereco: tipoEntrega === "entrega" ? endereco : null,
+      imagens: [{ src: "/bolo-redondo.jpg", alt: "Bolo Redondo", description: "Bolo Redondo Personalizado" }],
     }
     onAddToCart(produto)
     onClose()
@@ -416,3 +410,4 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
     </Dialog>
   )
 }
+

@@ -6,7 +6,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
-import Image from "next/image"
 import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
 import { BoloRedondoDialog } from "@/components/bolos/bolo-redondo-dialog"
 import { BoloRetangularDialog } from "@/components/bolos/bolo-retangular-dialog"
@@ -16,6 +15,7 @@ import { NakedCakeDialog } from "@/components/bolos/naked-cake-dialog"
 import { BoloPiscinaDialog } from "@/components/bolos/bolo-piscina-dialog"
 import { BoloVulcaoDialog } from "@/components/bolos/bolo-vulcao-dialog"
 import { CupcakeDialog } from "@/components/bolos/cupcake-dialog"
+import { ImageCarousel } from "@/components/image-carousel"
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] })
 const sour_candy = Sour_Candy({ weight: "400", subsets: ["latin"] })
@@ -23,11 +23,11 @@ const sour_candy = Sour_Candy({ weight: "400", subsets: ["latin"] })
 export const runtime = "edge"
 
 interface Produto {
-  id: number | string
+  id: string
   nome: string
   descricao?: string
   preco: number
-  imagem?: string
+  imagens: { src: string; alt: string; description: string }[]
   massa?: string
   tamanho?: string
   recheios?: string[]
@@ -41,64 +41,83 @@ interface Produto {
     complemento: string
   } | null
   observacao?: string
+  quantidade?: number
+  tipo?: string
 }
 
 const produtos: Produto[] = [
   {
-    id: 1,
+    id: "1",
     nome: "Bolo Redondo",
     descricao: "Varios tipos de bolos redondos, monte o seu",
     preco: 110.0,
-    imagem: "/bolo-chocolate.jpg",
+    imagens: [
+      { src: "/redondo-17.jpeg", alt: "Bolo redondo 17cm", description: "Bolo redondo 17cm" },
+      { src: "/redondo-23.jpeg", alt: "Bolo redondo 23cm", description: "Bolo redondo 23cm" },
+      { src: "/redondo-28.jpeg", alt: "Bolo redondo 28cm", description: "Bolo redondo 28cm" },
+    ],
   },
   {
-    id: 2,
+    id: "2",
     nome: "Bolo Retangular",
-    descricao: "Bolo retangular de personalizado",
+    descricao: "Bolo retangular personalizado",
     preco: 110.0,
-    imagem: "/bolo-retangular.jpg",
+    imagens: [{ src: "/retangular-25.jpeg", alt: "Bolo Retangular 25cm", description: "Bolo Retangular 25cm" },
+      { src: "/retangular-33.jpeg", alt: "Bolo Retangular 33cm", description: "Bolo Retangular 33cm" },
+      { src: "/retangular-40.jpeg", alt: "Bolo Retangular 40cm", description: "Bolo Retangular 40cm" }
+    ],
   },
   {
-    id: 3,
+    id: "3",
     nome: "Bolo de Metro",
-    descricao: "Meio metro e 1 metro de bolo de personalizado",
+    descricao: "Meio metro e 1 metro de bolo personalizado",
     preco: 600.0,
-    imagem: "/bolo-retangular.jpg",
+    imagens: [{ src: "/meio-metro.jpeg", alt: "Bolo meio metro", description: "Bolo meio metro" },
+      { src: "/um-metro.jpeg", alt: "Bolo um metro", description: "Bolo um metro" }
+    ],
   },
   {
-    id: 4,
+    id: "4",
     nome: "Bolo de Andar",
     descricao: "Bolo de 2 ou 3 andares para ocasiões especiais",
     preco: 450.0,
-    imagem: "/bolo-de-andar.jpg",
+    imagens: [
+      { src: "/bolo-de-andar.jpg", alt: "Bolo de Andar", description: "Bolo de andar para casamentos e festas" },
+    ],
   },
   {
-    id: 5,
+    id: "5",
     nome: "Naked Cake",
     descricao: "Bolo com cobertura rústica e decoração natural",
     preco: 120.0,
-    imagem: "/naked-cake.jpg",
+    imagens: [{ src: "/naked-cake.jpg", alt: "Naked Cake", description: "Naked cake com frutas frescas" }],
   },
   {
-    id: 6,
+    id: "6",
     nome: "Bolo Piscina",
     descricao: "Bolo decorado com tema de piscina",
     preco: 40.0,
-    imagem: "/bolo-piscina.jpg",
+    imagens: [{ src: "/bolo-piscina.jpg", alt: "Bolo Piscina", description: "Bolo piscina para festas de verão" }],
   },
   {
-    id: 7,
+    id: "7",
     nome: "Bolo Vulcão",
     descricao: "Bolo com cobertura derretida simulando um vulcão",
     preco: 45.0,
-    imagem: "/bolo-vulcao.jpg",
+    imagens: [
+      { src: "/bolo-vulcao-tradicional.jpg", alt: "Bolo Vulcão Tradicional", description: "Bolo vulcão tradicional" },
+      { src: "/bolo-vulcao-gigante.jpg", alt: "Bolo Vulcão Gigante", description: "Bolo vulcão gigante" },
+    ],
   },
   {
-    id: 8,
+    id: "8",
     nome: "Cupcakes",
     descricao: "Minibolos decorados individualmente",
     preco: 3.5,
-    imagem: "/cupcake.jpg",
+    imagens: [
+      { src: "/cupcake-simples.jpg", alt: "Cupcake Simples", description: "Cupcake simples" },
+      { src: "/cupcake-recheado.jpg", alt: "Cupcake Recheado", description: "Cupcake recheado" },
+    ],
   },
 ]
 
@@ -114,6 +133,7 @@ export default function CardapioDigital() {
   const [boloPiscinaDialogOpen, setBoloPiscinaDialogOpen] = useState(false)
   const [boloVulcaoDialogOpen, setBoloVulcaoDialogOpen] = useState(false)
   const [cupcakeDialogOpen, setCupcakeDialogOpen] = useState(false)
+  const [produtoDescricoes, setProdutoDescricoes] = useState<{ [key: string]: string }>({})
 
   useEffect(() => {
     // Simula o processo de login
@@ -132,21 +152,21 @@ export default function CardapioDigital() {
   }, [carrinho])
 
   const adicionarAoCarrinho = (produto: Produto) => {
-    if (produto.id === 1) {
+    if (produto.id === "1") {
       setBoloRedondoDialogOpen(true)
-    } else if (produto.id === 2) {
+    } else if (produto.id === "2") {
       setBoloRetangularDialogOpen(true)
-    } else if (produto.id === 3) {
+    } else if (produto.id === "3") {
       setBoloMetroDialogOpen(true)
-    } else if (produto.id === 4) {
+    } else if (produto.id === "4") {
       setBoloAndarDialogOpen(true)
-    } else if (produto.id === 5) {
+    } else if (produto.id === "5") {
       setNakedCakeDialogOpen(true)
-    } else if (produto.id === 6) {
+    } else if (produto.id === "6") {
       setBoloPiscinaDialogOpen(true)
-    } else if (produto.id === 7) {
+    } else if (produto.id === "7") {
       setBoloVulcaoDialogOpen(true)
-    } else if (produto.id === 8) {
+    } else if (produto.id === "8") {
       setCupcakeDialogOpen(true)
     } else {
       setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
@@ -302,25 +322,22 @@ export default function CardapioDigital() {
             {produtos.map((produto) => (
               <Card
                 key={produto.id}
-                className="bg-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 rounded-xl overflow-hidden mb-4"
+                className="bg-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 rounded-xl overflow-hidden"
               >
                 <CardHeader className="p-0">
-                  <div className="relative h-48 w-full">
-                    <Image
-                      src={produto.imagem || "/placeholder.svg"}
-                      alt={produto.nome}
-                      layout="fill"
-                      objectFit="cover"
-                      className="transition-transform duration-300 hover:scale-110"
-                    />
-                  </div>
+                  <ImageCarousel
+                    images={produto.imagens}
+                    onDescriptionChange={(description) =>
+                      setProdutoDescricoes({ ...produtoDescricoes, [produto.id]: description })
+                    }
+                  />
                 </CardHeader>
                 <CardContent className="p-6">
                   <CardTitle className={`${pacifico.className} text-2xl font-bold text-pink-700 mb-2`}>
                     {produto.nome}
                   </CardTitle>
                   <CardDescription className={`${sour_candy.className} text-pink-500 mb-4`}>
-                    {produto.descricao}
+                    {produtoDescricoes[produto.id] || produto.descricao}
                   </CardDescription>
                   <div className="flex justify-between items-center">
                     <span className={`${sour_candy.className} text-2xl font-semibold text-pink-600`}>

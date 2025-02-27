@@ -56,31 +56,23 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
-interface Produto {
-  id: number | string
-  nome: string
-  descricao?: string
-  preco: number
-  imagem?: string
-  massa?: string
-  tamanho?: string
-  recheios?: string[]
-  adicionais?: string[]
-  dataEntrega?: string
-  tipoEntrega?: "retirada" | "entrega"
-  endereco?: {
-    rua: string
-    bairro: string
-    numero: string
-    complemento: string
-  } | null
-  observacao?: string
-}
-
 interface BoloAndarDialogProps {
   isOpen: boolean
   onClose: () => void
-  onAddToCart: (produto: Produto) => void
+  onAddToCart: (produto: any) => void
+}
+
+interface Produto {
+  id: string
+  nome: string
+  tamanho: string | undefined
+  massa: string
+  recheios: string[]
+  adicionais: string[]
+  preco: number
+  dataEntrega: string
+  observacao: string
+  imagens: { src: string; alt: string; description: string }[]
 }
 
 export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialogProps) {
@@ -114,7 +106,7 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
   const dataMinima = addDays(new Date(), 4)
 
   const handleAddToCart = () => {
-    const produto = {
+    const produto: Produto = {
       id: `bolo-andar-${Date.now()}`,
       nome: "Bolo de Andar",
       tamanho: tamanhos.find((t) => t.id === tamanho)?.nome,
@@ -124,6 +116,7 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
       preco: calcularPrecoTotal(),
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       observacao: "Incluso topper e entrega",
+      imagens: [{ src: "/bolo-de-andar.jpg", alt: "Bolo de Andar", description: "Bolo de Andar Personalizado" }],
     }
     onAddToCart(produto)
     onClose()

@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
 import { Calendar } from "@/components/ui/calendar"
-import { Pacifico, Sour_Gummy as Sour_Candy } from 'next/font/google'
+import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
 import { format, addDays, isBefore } from "date-fns"
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] })
@@ -19,26 +19,14 @@ const tipos = [
 ]
 
 interface Produto {
-  id: number | string
+  id: string
   nome: string
-  descricao?: string
+  tipo: string
   preco: number
-  imagem?: string
-  massa?: string
-  tamanho?: string
-  recheios?: string[]
-  adicionais?: string[]
-  dataEntrega?: string
-  tipoEntrega?: "retirada" | "entrega"
-  endereco?: {
-    rua: string
-    bairro: string
-    numero: string
-    complemento: string
-  } | null
-  observacao?: string
+  quantidade: number
+  dataEntrega: string
+  imagens: { src: string; alt: string; description: string }[]
 }
-
 
 interface CupcakeDialogProps {
   isOpen: boolean
@@ -48,7 +36,7 @@ interface CupcakeDialogProps {
 
 export function CupcakeDialog({ isOpen, onClose, onAddToCart }: CupcakeDialogProps) {
   const [tipo, setTipo] = useState<string>("")
-  const [quantidade, setQuantidade] = useState<number>(0)
+  const [quantidade, setQuantidade] = useState<number>(1)
   const [dataEntrega, setDataEntrega] = useState<Date | undefined>(undefined)
 
   const dataMinima = addDays(new Date(), 4)
@@ -57,13 +45,14 @@ export function CupcakeDialog({ isOpen, onClose, onAddToCart }: CupcakeDialogPro
     const tipoSelecionado = tipos.find((t) => t.id === tipo)
     if (!tipoSelecionado) return
 
-    const produto = {
+    const produto: Produto = {
       id: `cupcake-${Date.now()}`,
       nome: `Cupcake ${tipoSelecionado.nome}`,
       tipo: tipoSelecionado.nome,
       preco: tipoSelecionado.preco * quantidade,
       quantidade: quantidade,
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
+      imagens: [{ src: "/cupcake.jpg", alt: "Cupcake", description: `Cupcake ${tipoSelecionado.nome}` }],
     }
     onAddToCart(produto)
     onClose()
@@ -108,7 +97,7 @@ export function CupcakeDialog({ isOpen, onClose, onAddToCart }: CupcakeDialogPro
               type="number"
               min="1"
               value={quantidade}
-              onChange={(e) => setQuantidade(parseInt(e.target.value) || 1)}
+              onChange={(e) => setQuantidade(Number.parseInt(e.target.value) || 1)}
               className="w-full"
             />
           </div>
@@ -141,3 +130,4 @@ export function CupcakeDialog({ isOpen, onClose, onAddToCart }: CupcakeDialogPro
     </Dialog>
   )
 }
+
