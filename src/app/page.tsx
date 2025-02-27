@@ -142,15 +142,22 @@ const produtos: Produto[] = [
   {
     id: "4",
     nome: "Bolo de Andar",
-    descricao: "Bolo de 2 ou 3 andares para ocasiões especiais",
+    descricao: "Bolo de 2 andares render 65 a 70 fatias, de 3 andares rende 100 a 110 fatias",
     preco: 450.0,
     imagens: [
       {
-        src: "/bolo-de-andar.jpg",
-        alt: "Bolo de Andar",
+        src: "/bolo-andar1.jpeg",
+        alt: "Bolo 2 Andares",
         description: "Bolo de andar para casamentos e festas",
-        name: "Bolo de Andar",
+        name: "Bolo 2 Andares",
         price: 450.0,
+      },
+      {
+        src: "/bolo-andar-1.jpeg",
+        alt: "Bolo 3 Andares",
+        description: "Bolo de andar para casamentos e festas",
+        name: "Bolo 3 Andares",
+        price: 750.0,
       },
     ],
   },
@@ -161,7 +168,7 @@ const produtos: Produto[] = [
     preco: 120.0,
     imagens: [
       {
-        src: "/bolo-acetato.jpg",
+        src: "/bolo-acetato.jpeg",
         alt: "Bolo no Acetato",
         description: "Bolo no Acetato decorado",
         name: "Bolo no Acetato",
@@ -176,12 +183,13 @@ const produtos: Produto[] = [
     preco: 40.0,
     imagens: [
       {
-        src: "/bolo-piscina.jpg",
+        src: "/bolo-piscina.jpeg",
         alt: "Bolo Piscina",
         description: "Bolo piscina para festas de verão",
         name: "Bolo Piscina",
         price: 40.0,
       },
+      
     ],
   },
   {
@@ -191,18 +199,18 @@ const produtos: Produto[] = [
     preco: 45.0,
     imagens: [
       {
-        src: "/bolo-vulcao-tradicional.jpg",
+        src: "/bolo-vulcao-1.jpeg",
         alt: "Bolo Vulcão Tradicional",
         description: "Bolo vulcão tradicional",
         name: "Bolo Vulcão Tradicional",
         price: 45.0,
       },
       {
-        src: "/bolo-vulcao-gigante.jpg",
+        src: "/bolo-vulcao-2.jpeg",
         alt: "Bolo Vulcão Gigante",
         description: "Bolo vulcão gigante",
         name: "Bolo Vulcão Gigante",
-        price: 75.0,
+        price: 80.0,
       },
     ],
   },
@@ -213,18 +221,11 @@ const produtos: Produto[] = [
     preco: 3.5,
     imagens: [
       {
-        src: "/cupcake-simples.jpg",
+        src: "/cupcake.jpeg",
         alt: "Cupcake Simples",
         description: "Cupcake simples",
-        name: "Cupcake Simples",
+        name: "Cupcake",
         price: 3.5,
-      },
-      {
-        src: "/cupcake-recheado.jpg",
-        alt: "Cupcake Recheado",
-        description: "Cupcake recheado",
-        name: "Cupcake Recheado",
-        price: 5.0,
       },
     ],
   },
@@ -434,7 +435,7 @@ export default function CardapioDigital() {
             {produtos.map((produto) => (
               <Card
                 key={produto.id}
-                className="bg-white shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 rounded-xl overflow-hidden"
+                className="bg-white mb-9 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 rounded-xl overflow-hidden"
               >
                 <CardHeader className="p-0">
                   <ImageCarousel

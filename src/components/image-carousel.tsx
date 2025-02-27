@@ -34,7 +34,7 @@ export function ImageCarousel({ images, onImageChange }: ImageCarouselProps) {
   }
 
   return (
-    <div className="relative h-48 w-full">
+    <div className="relative h-80 w-full">
       <Image
         src={images[currentIndex].src || "/placeholder.svg"}
         alt={images[currentIndex].alt}
