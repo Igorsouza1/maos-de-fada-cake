@@ -322,7 +322,7 @@ export default function CardapioDigital() {
     // Simula o processo de login
     const timer = setTimeout(() => {
       setIsLoading(false)
-    }, 2000)
+    }, 1500)
 
     return () => clearTimeout(timer)
   }, [])
