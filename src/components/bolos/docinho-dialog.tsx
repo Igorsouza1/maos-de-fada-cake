@@ -19,12 +19,13 @@ const sabores = [
   { id: "brigadeiro", nome: "Brigadeiro" },
   { id: "beijinho", nome: "Beijinho" },
   { id: "2amores", nome: "2 Amores" },
-  { id: "ninhonutella", nome: "Ninho com Nutella" },
+  { id: "ninhonutella", nome: "Ninho com Nutella", preco: 20 },
 ]
 
 const quantidades = [
   { id: "50", nome: "50 docinhos", preco: 70 },
-  { id: "100", nome: "100 docinhos", preco: 140 },
+  { id: "120", nome: "120 docinhos", preco: 168 },
+  { id: "150", nome: "150 docinhos", preco: 210 },
 ]
 
 interface Produto {
@@ -76,12 +77,14 @@ export function DocinhosDialog({ isOpen, onClose, onAddToCart }: DocinhosDialogP
     const quantidadeObj = quantidades.find((q) => q.id === quantidadeSelecionada)
     if (!quantidadeObj) return
 
+    const adicionalNinhoNutella = saboresSelecionados.includes("ninhonutella") ? 20 : 0
+
     const produto: Produto = {
       id: `docinhos-${Date.now()}`,
       nome: "Docinhos",
       sabores: saboresSelecionados,
       quantidade: Number.parseInt(quantidadeObj.id),
-      preco: quantidadeObj.preco,
+      preco: quantidadeObj.preco + adicionalNinhoNutella,
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       tipoEntrega,
       endereco: tipoEntrega === "entrega" ? endereco : null,
@@ -91,7 +94,7 @@ export function DocinhosDialog({ isOpen, onClose, onAddToCart }: DocinhosDialogP
           alt: "Docinhos",
           description: "Docinhos variados",
           name: "Docinhos",
-          price: quantidadeObj.preco,
+          price: quantidadeObj.preco + adicionalNinhoNutella,
         },
       ],
     }
@@ -139,6 +142,7 @@ export function DocinhosDialog({ isOpen, onClose, onAddToCart }: DocinhosDialogP
                         className={`${sour_candy.className} text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 flex-grow`}
                       >
                         {sabor.nome}
+                        {sabor.preco && <span className="ml-2 text-pink-600">(+R${sabor.preco.toFixed(2)})</span>}
                       </label>
                     </div>
                   ))}
