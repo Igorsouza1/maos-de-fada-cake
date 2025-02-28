@@ -24,8 +24,7 @@ const sabores = [
 
 const quantidades = [
   { id: "50", nome: "50 docinhos", preco: 70 },
-  { id: "120", nome: "120 docinhos", preco: 168 },
-  { id: "150", nome: "150 docinhos", preco: 210 },
+  { id: "100", nome: "100 docinhos", preco: 140 },
 ]
 
 interface Produto {
