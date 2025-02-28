@@ -5,10 +5,12 @@ import { ShoppingCart, X } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet"
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetTrigger } from "@/components/ui/sheet"
 import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
 import dynamic from "next/dynamic"
-import {ImageCarousel} from "@/components/image-carousel" // Import ImageCarousel
+import { ImageCarousel } from "@/components/image-carousel" // Import ImageCarousel
+import { BoloAquarioDialog } from "@/components/bolos/bolo-aquario-dialog"
+import { BoloMarmitaDialog } from "@/components/bolos/bolo-marmita-dialog"
 
 const BoloRedondoDialog = dynamic(() =>
   import("@/components/bolos/bolo-redondo-dialog").then((mod) => mod.BoloRedondoDialog),
@@ -189,7 +191,6 @@ const produtos: Produto[] = [
         name: "Bolo Piscina",
         price: 40.0,
       },
-      
     ],
   },
   {
@@ -229,6 +230,43 @@ const produtos: Produto[] = [
       },
     ],
   },
+  {
+    id: "9",
+    nome: "Bolo Aquário",
+    descricao: "Bolo decorado com tema aquático e efeito de aquário",
+    preco: 750.0,
+    imagens: [
+      {
+        src: "/bolo-aquario-1.jpeg",
+        alt: "Bolo Aquário",
+        description: "Bolo decorado com tema aquático",
+        name: "Bolo Aquário",
+        price: 750.0,
+      },
+      {
+        src: "/bolo-aquario-2.jpeg",
+        alt: "Bolo Aquário Personalizado",
+        description: "Bolo aquário com decorações personalizadas",
+        name: "Bolo Aquário Personalizado",
+        price: 750.0,
+      },
+    ],
+  },
+  {
+    id: "10",
+    nome: "Bolo na Marmita",
+    descricao: "Bolos individuais em marmita, mínimo 10 unidades",
+    preco: 8.0,
+    imagens: [
+      {
+        src: "/bolo-marmita.jpeg",
+        alt: "Bolo na Marmita",
+        description: "Bolo individual em marmita",
+        name: "Bolo na Marmita",
+        price: 8.0,
+      },
+    ],
+  },
 ]
 
 export default function CardapioDigital() {
@@ -243,7 +281,8 @@ export default function CardapioDigital() {
   const [boloPiscinaDialogOpen, setBoloPiscinaDialogOpen] = useState(false)
   const [boloVulcaoDialogOpen, setBoloVulcaoDialogOpen] = useState(false)
   const [cupcakeDialogOpen, setCupcakeDialogOpen] = useState(false)
-  const [produtoDescricoes, setProdutoDescricoes] = useState<{ [key: string]: string }>({})
+  const [boloAquarioDialogOpen, setboloAquarioDialogOpen] = useState(false)
+  const [boloMarmitaDialogOpen, setBoloMarmitaDialogOpen] = useState(false)
   const [produtoInfo, setProdutoInfo] = useState<{
     [key: string]: { name: string; price: number; description: string }
   }>({})
@@ -281,6 +320,10 @@ export default function CardapioDigital() {
       setBoloVulcaoDialogOpen(true)
     } else if (produto.id === "8") {
       setCupcakeDialogOpen(true)
+    } else if (produto.id === "9") {
+      setboloAquarioDialogOpen(true)
+    } else if (produto.id === "10") {
+      setBoloMarmitaDialogOpen(true)
     } else {
       setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
     }
@@ -357,20 +400,20 @@ export default function CardapioDigital() {
 
   return (
     <div className="min-h-screen bg-white">
-  {/* Background pattern section */}
-  <div className="relative h-72 bg-repeat" style={{ backgroundImage: "url('/backgrund.jpg')" }}>
-    {/* Camada de preto bem leve sem afetar as letras */}
-    <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-transparent" />
-    
-    <div className="relative pt-12 pb-8 text-center">
-      <h1 className={`${pacifico.className} text-5xl font-bold text-white mb-2 drop-shadow-lg`}>
-        Mãos de Fada Cake
-      </h1>
-      <p className={`${sour_candy.className} text-white italic text-lg drop-shadow-md`}>
-        Delícias artesanais para adoçar seu dia
-      </p>
-    </div>
-  </div>
+      {/* Background pattern section */}
+      <div className="relative h-72 bg-repeat" style={{ backgroundImage: "url('/backgrund.jpg')" }}>
+        {/* Camada de preto bem leve sem afetar as letras */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-transparent" />
+
+        <div className="relative pt-12 pb-8 text-center">
+          <h1 className={`${pacifico.className} text-5xl font-bold text-white mb-2 drop-shadow-lg`}>
+            Mãos de Fada Cake
+          </h1>
+          <p className={`${sour_candy.className} text-white italic text-lg drop-shadow-md`}>
+            Delícias artesanais para adoçar seu dia
+          </p>
+        </div>
+      </div>
 
       {/* Content section that overlaps with the background */}
       <div className="relative -mt-20 px-4">
@@ -531,6 +574,22 @@ export default function CardapioDigital() {
         onAddToCart={(produto) => {
           setCarrinho((prevCarrinho) => [...prevCarrinho, produto as Produto])
           setCupcakeDialogOpen(false)
+        }}
+      />
+      <BoloAquarioDialog
+        isOpen={boloAquarioDialogOpen}
+        onClose={() => setboloAquarioDialogOpen(false)}
+        onAddToCart={(produto) => {
+          setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
+          setboloAquarioDialogOpen(false)
+        }}
+      />
+      <BoloMarmitaDialog
+        isOpen={boloMarmitaDialogOpen}
+        onClose={() => setBoloMarmitaDialogOpen(false)}
+        onAddToCart={(produto) => {
+          setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
+          setBoloMarmitaDialogOpen(false)
         }}
       />
     </div>
