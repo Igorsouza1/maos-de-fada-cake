@@ -59,29 +59,37 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
-interface BoloAndarDialogProps {
-  isOpen: boolean
-  onClose: () => void
-  onAddToCart: (produto: any) => void
-}
-
 interface Produto {
   id: string
   nome: string
-  tamanho: string | undefined
-  massa: string
-  recheios: string[]
-  adicionais: string[]
+  descricao?: string // Make descricao optional
   preco: number
-  dataEntrega: string
-  endereco: {
+  imagens: { src: string; alt: string; description: string; name: string; price: number }[]
+  massa?: string
+  tamanho?: string
+  recheios?: string[]
+  adicionais?: string[]
+  dataEntrega?: string
+  tipoEntrega?: "retirada" | "entrega"
+  endereco?: {
     rua: string
-    numero: string
     bairro: string
+    numero: string
     complemento: string
-  }
-  imagens: { src: string; alt: string; description: string }[]
+  } | null
+  observacao?: string
+  quantidade?: number
+  tipo?: string
+  cobertura?: string // Add this for Bolo Piscina
 }
+
+interface BoloAndarDialogProps {
+  isOpen: boolean
+  onClose: () => void
+  onAddToCart: (produto: Produto) => void
+}
+
+
 
 export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialogProps) {
   const [etapa, setEtapa] = useState(1)
@@ -125,7 +133,7 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
       preco: calcularPrecoTotal(),
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       endereco: endereco,
-      imagens: [{ src: "/bolo-de-andar.jpg", alt: "Bolo de Andar", description: "Bolo de Andar Personalizado" }],
+      imagens: [{ src: "/bolo-de-andar.jpg", alt: "Bolo de Andar", description: "Bolo de Andar Personalizado", name: "Bolo de Andar", price: calcularPrecoTotal() }],
     }
     onAddToCart(produto)
     onClose()

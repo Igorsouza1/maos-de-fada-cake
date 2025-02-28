@@ -49,10 +49,34 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
+interface Produto {
+  id: string
+  nome: string
+  descricao?: string // Make descricao optional
+  preco: number
+  imagens: { src: string; alt: string; description: string; name: string; price: number }[]
+  massa?: string
+  tamanho?: string
+  recheios?: string[]
+  adicionais?: string[]
+  dataEntrega?: string
+  tipoEntrega?: "retirada" | "entrega"
+  endereco?: {
+    rua: string
+    bairro: string
+    numero: string
+    complemento: string
+  } | null
+  observacao?: string
+  quantidade?: number
+  tipo?: string
+  cobertura?: string // Add this for Bolo Piscina
+}
+
 interface BoloAcetatoDialogProps {
   isOpen: boolean
   onClose: () => void
-  onAddToCart: (produto: any) => void
+  onAddToCart: (produto: Produto) => void
 }
 
 export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoDialogProps) {
@@ -87,19 +111,27 @@ export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoD
   const dataMinima = addDays(new Date(), 4)
 
   const handleAddToCart = () => {
-    const produto = {
+    const produto: Produto = { // <-- O Produto está sendo criado aqui!
       id: `bolo-acetato-${Date.now()}`,
       nome: "Bolo no Acetato",
-      tamanho: tamanhos.find((t) => t.id === tamanho)?.nome,
+      descricao: "Bolo decorado em acetato para ocasiões especiais",
+      preco: calcularPrecoTotal(),
+      imagens: [{ 
+        src: "/bolo-acetato.jpg", 
+        alt: "Bolo no Acetato", 
+        description: "Bolo no Acetato Personalizado", 
+        name: "Bolo no Acetato", 
+        price: calcularPrecoTotal()
+      }],
+      tamanho: tamanhos.find((t) => t.id === tamanho)?.nome || "",
       recheios: recheiosSelecionados,
       adicionais: adicionaisSelecionados,
-      preco: calcularPrecoTotal(),
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       tipoEntrega,
       endereco: tipoEntrega === "entrega" ? endereco : null,
-      imagens: [{ src: "/bolo-acetato.jpg", alt: "Bolo no Acetato", description: "Bolo no Acetato Personalizado" }],
     }
-    onAddToCart(produto)
+  
+    onAddToCart(produto) // <-- Aqui o produto é enviado para a função onAddToCart
     onClose()
     resetForm()
   }

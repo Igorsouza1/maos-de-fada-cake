@@ -53,25 +53,37 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
-interface BoloRedondoDialogProps {
-  isOpen: boolean
-  onClose: () => void
-  onAddToCart: (produto: any) => void
-}
-
 interface Produto {
   id: string
   nome: string
-  massa: string
-  tamanho: string | undefined
-  recheios: string[]
-  adicionais: string[]
+  descricao?: string // Make descricao optional
   preco: number
-  dataEntrega: string
-  tipoEntrega: "retirada" | "entrega"
-  endereco: { rua: string; bairro: string; numero: string; complemento: string } | null
-  imagens: { src: string; alt: string; description: string }[]
+  imagens: { src: string; alt: string; description: string; name: string; price: number }[]
+  massa?: string
+  tamanho?: string
+  recheios?: string[]
+  adicionais?: string[]
+  dataEntrega?: string
+  tipoEntrega?: "retirada" | "entrega"
+  endereco?: {
+    rua: string
+    bairro: string
+    numero: string
+    complemento: string
+  } | null
+  observacao?: string
+  quantidade?: number
+  tipo?: string
+  cobertura?: string // Add this for Bolo Piscina
 }
+
+interface BoloRedondoDialogProps {
+  isOpen: boolean
+  onClose: () => void
+  onAddToCart: (produto: Produto) => void
+}
+
+
 
 export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoDialogProps) {
   const [etapa, setEtapa] = useState(1)
@@ -133,7 +145,7 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       tipoEntrega,
       endereco: tipoEntrega === "entrega" ? endereco : null,
-      imagens: [{ src: "/bolo-redondo.jpg", alt: "Bolo Redondo", description: "Bolo Redondo Personalizado" }],
+      imagens: [{ src: "/bolo-redondo.jpg", alt: "Bolo Redondo", description: "Bolo Redondo Personalizado", name: "Bolo Redondo", price: calcularPrecoTotal() }],
     }
     onAddToCart(produto)
     onClose()
