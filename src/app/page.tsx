@@ -182,7 +182,7 @@ const produtos: Produto[] = [
   {
     id: "6",
     nome: "Bolo Piscina",
-    descricao: "Bolo decorado com tema de piscina",
+    descricao: "Bolo decorado",
     preco: 40.0,
     imagens: [
       {
@@ -234,13 +234,13 @@ const produtos: Produto[] = [
   {
     id: "9",
     nome: "Bolo Aquário",
-    descricao: "Bolo decorado com tema aquático e efeito de aquário",
+    descricao: "Bolo decorado e efeito de aquário",
     preco: 750.0,
     imagens: [
       {
         src: "/bolo-aquario-1.jpeg",
         alt: "Bolo Aquário",
-        description: "Bolo decorado com tema aquático",
+        description: "Bolo decorado",
         name: "Bolo Aquário",
         price: 750.0,
       },
