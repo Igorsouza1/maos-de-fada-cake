@@ -18,10 +18,9 @@ const sour_candy = Sour_Candy({ weight: "400", subsets: ["latin"] })
 const massas = ["Amanteigada", "Chocolate", "Pão de Ló"]
 
 const tamanhos = [
-  { id: "20x30", nome: "20x30 cm (20 a 25 fatias)", preco: 110 },
-  { id: "25x35", nome: "25x35 cm (30 a 35 fatias)", preco: 180 },
-  { id: "30x40", nome: "30x40 cm (40 a 45 fatias)", preco: 200 },
-  { id: "35x45", nome: "35x45 cm (50 a 55 fatias)", preco: 270 },
+  { id: "20x30", nome: "25x20 cm (20 a 25 fatias)", preco: 200 },
+  { id: "25x35", nome: "33x25 cm (30 a 35 fatias)", preco: 270 },
+  { id: "30x40", nome: "50x40 cm (40 a 45 fatias)", preco: 650 },
 ]
 
 const recheiosSimples = ["4 Leites", "Brigadeiro", "Leite Ninho", "Chocolate", "Morango ao Leite", "Maracujá ao Leite"]
