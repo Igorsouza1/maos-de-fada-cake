@@ -248,7 +248,7 @@ const produtos: Produto[] = [
         src: "/bolo-aquario-2.jpeg",
         alt: "Bolo Aquário Personalizado",
         description: "Bolo aquário com decorações personalizadas",
-        name: "Bolo Aquário Personalizado",
+        name: "Bolo Aquário",
         price: 750.0,
       },
     ],
