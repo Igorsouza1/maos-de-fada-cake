@@ -20,7 +20,7 @@ const massas = ["Amanteigada", "Chocolate", "Pão de Ló"]
 const tamanhos = [
   { id: "20x30", nome: "25x20 cm (20 a 25 fatias)", preco: 200 },
   { id: "25x35", nome: "33x25 cm (30 a 35 fatias)", preco: 270 },
-  { id: "30x40", nome: "50x40 cm (40 a 45 fatias)", preco: 650 },
+  { id: "30x40", nome: "40x25 cm (40 a 45 fatias)", preco: 350 },
 ]
 
 const recheiosSimples = ["4 Leites", "Brigadeiro", "Leite Ninho", "Chocolate", "Morango ao Leite", "Maracujá ao Leite"]
