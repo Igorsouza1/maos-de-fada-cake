@@ -11,6 +11,7 @@ import dynamic from "next/dynamic"
 import { ImageCarousel } from "@/components/image-carousel" // Import ImageCarousel
 import { BoloAquarioDialog } from "@/components/bolos/bolo-aquario-dialog"
 import { BoloMarmitaDialog } from "@/components/bolos/bolo-marmita-dialog"
+import { DocinhosDialog } from "@/components/bolos/docinho-dialog"
 
 const BoloRedondoDialog = dynamic(() =>
   import("@/components/bolos/bolo-redondo-dialog").then((mod) => mod.BoloRedondoDialog),
@@ -234,21 +235,21 @@ const produtos: Produto[] = [
     id: "9",
     nome: "Bolo Aquário",
     descricao: "Bolo decorado com tema aquático e efeito de aquário",
-    preco: 750.0,
+    preco: 150.0,
     imagens: [
       {
         src: "/bolo-aquario-1.jpeg",
         alt: "Bolo Aquário",
         description: "Bolo decorado com tema aquático",
         name: "Bolo Aquário",
-        price: 750.0,
+        price: 150.0,
       },
       {
         src: "/bolo-aquario-2.jpeg",
         alt: "Bolo Aquário Personalizado",
         description: "Bolo aquário com decorações personalizadas",
         name: "Bolo Aquário Personalizado",
-        price: 750.0,
+        price: 150.0,
       },
     ],
   },
@@ -264,6 +265,35 @@ const produtos: Produto[] = [
         description: "Bolo individual em marmita",
         name: "Bolo na Marmita",
         price: 8.0,
+      },
+    ],
+  },
+  {
+    id: "11",
+    nome: "Docinhos",
+    descricao: "Brigadeiros, beijinhos e sabores especiais",
+    preco: 70.0,
+    imagens: [
+      {
+        src: "/docinho-1.jpeg",
+        alt: "Docinhos Variados",
+        description: "Seleção de docinhos variados",
+        name: "Docinhos",
+        price: 70.0,
+      },
+      {
+        src: "/docinho-2.jpeg",
+        alt: "Docinhos Variados",
+        description: "Seleção de docinhos variados",
+        name: "Docinhos",
+        price: 70.0,
+      },
+      {
+        src: "/docinho-3.jpeg",
+        alt: "Docinhos Variados",
+        description: "Seleção de docinhos variados",
+        name: "Docinhos",
+        price: 70.0,
       },
     ],
   },
@@ -286,6 +316,7 @@ export default function CardapioDigital() {
   const [produtoInfo, setProdutoInfo] = useState<{
     [key: string]: { name: string; price: number; description: string }
   }>({})
+  const [docinhosDialogOpen, setDocinhosDialogOpen] = useState(false)
 
   useEffect(() => {
     // Simula o processo de login
@@ -324,6 +355,8 @@ export default function CardapioDigital() {
       setboloAquarioDialogOpen(true)
     } else if (produto.id === "10") {
       setBoloMarmitaDialogOpen(true)
+    } else if (produto.id === "11") {
+      setDocinhosDialogOpen(true)
     } else {
       setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
     }
@@ -406,10 +439,12 @@ export default function CardapioDigital() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-transparent" />
 
         <div className="relative pt-12 pb-8 text-center">
-          <h1 className={`${pacifico.className} text-5xl font-bold text-white mb-2 drop-shadow-lg`}>
+          <h1 className={`${pacifico.className} text-5xl font-bold text-white mb-2 drop-shadow-lg text-shadow-sm`}>
             Mãos de Fada Cake
           </h1>
-          <p className={`${sour_candy.className} text-white italic text-lg drop-shadow-md`}>
+          <p
+            className={`${sour_candy.className} text-white italic text-lg bg-white bg-opacity-20 inline-block px-4 py-2 rounded-full`}
+          >
             Delícias artesanais para adoçar seu dia
           </p>
         </div>
@@ -480,7 +515,7 @@ export default function CardapioDigital() {
             {produtos.map((produto) => (
               <Card
                 key={produto.id}
-                className="bg-white mb-9 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 rounded-xl overflow-hidden"
+                className="bg-gradient-to-b from-white to-pink-50 mb-9 shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1 rounded-xl overflow-hidden border border-pink-100"
               >
                 <CardHeader className="p-0">
                   <ImageCarousel
@@ -488,8 +523,8 @@ export default function CardapioDigital() {
                     onImageChange={(info) => setProdutoInfo({ ...produtoInfo, [produto.id]: info })}
                   />
                 </CardHeader>
-                <CardContent className="p-6">
-                  <CardTitle className={`${pacifico.className} text-2xl font-bold text-pink-700 mb-2`}>
+                <CardContent className="p-6 pt-8">
+                  <CardTitle className={`${pacifico.className} text-3xl font-bold text-pink-700 mb-3 emboss`}>
                     {produtoInfo[produto.id]?.name || produto.nome}
                   </CardTitle>
                   <CardDescription className={`${sour_candy.className} text-pink-500 mb-4`}>
@@ -590,6 +625,14 @@ export default function CardapioDigital() {
         onAddToCart={(produto) => {
           setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
           setBoloMarmitaDialogOpen(false)
+        }}
+      />
+      <DocinhosDialog
+        isOpen={docinhosDialogOpen}
+        onClose={() => setDocinhosDialogOpen(false)}
+        onAddToCart={(produto) => {
+          setCarrinho((prevCarrinho) => [...prevCarrinho, produto])
+          setDocinhosDialogOpen(false)
         }}
       />
     </div>
