@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Pacifico, Sour_Gummy as Sour_Candy } from 'next/font/google'
+import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
 import { Separator } from "@/components/ui/separator"
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
@@ -50,6 +50,10 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
+// Adicione estas constantes no início do arquivo, junto com as outras constantes
+const horariosRetirada = ["11:00", "12:00", "15:00", "18:00", "19:00"]
+const horariosEntrega = ["13:30", "17:30", "18:00", "19:00"]
+
 interface Produto {
   id: string
   nome: string
@@ -72,6 +76,7 @@ interface Produto {
   quantidade?: number
   tipo?: string
   cobertura?: string // Add this for Bolo Piscina
+  horario?: string
   horarioEntrega?: string
 }
 
@@ -91,17 +96,7 @@ export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoD
   const [tipoEntrega, setTipoEntrega] = useState<"retirada" | "entrega">("retirada")
   const [endereco, setEndereco] = useState({ rua: "", bairro: "", numero: "", complemento: "" })
   const [horarioEntrega, setHorarioEntrega] = useState<string>("")
-
-  const horariosEntrega = [
-    "09:00 - 10:00",
-    "10:00 - 11:00",
-    "11:00 - 12:00",
-    "14:00 - 15:00",
-    "15:00 - 16:00",
-    "16:00 - 17:00",
-    "17:00 - 18:00",
-    "18:00 - 19:00"
-  ]
+  const [horarioSelecionado, setHorarioSelecionado] = useState<string>("")
 
   const avancarEtapa = () => {
     setEtapa(etapa + 1)
@@ -125,27 +120,31 @@ export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoD
   const dataMinima = addDays(new Date(), 4)
 
   const handleAddToCart = () => {
-    const produto: Produto = { // <-- O Produto está sendo criado aqui!
+    const produto: Produto = {
+      // <-- O Produto está sendo criado aqui!
       id: `bolo-acetato-${Date.now()}`,
       nome: "Bolo no Acetato",
       descricao: "Bolo decorado em acetato para ocasiões especiais",
       preco: calcularPrecoTotal(),
-      imagens: [{ 
-        src: "/bolo-acetato.jpg", 
-        alt: "Bolo no Acetato", 
-        description: "Bolo no Acetato Personalizado", 
-        name: "Bolo no Acetato", 
-        price: calcularPrecoTotal()
-      }],
+      imagens: [
+        {
+          src: "/bolo-acetato.jpg",
+          alt: "Bolo no Acetato",
+          description: "Bolo no Acetato Personalizado",
+          name: "Bolo no Acetato",
+          price: calcularPrecoTotal(),
+        },
+      ],
       tamanho: tamanhos.find((t) => t.id === tamanho)?.nome || "",
       recheios: recheiosSelecionados,
       adicionais: adicionaisSelecionados,
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       tipoEntrega,
+      horario: horarioSelecionado,
       endereco: tipoEntrega === "entrega" ? endereco : null,
       horarioEntrega: horarioEntrega,
     }
-  
+
     onAddToCart(produto) // <-- Aqui o produto é enviado para a função onAddToCart
     onClose()
     resetForm()
@@ -159,6 +158,7 @@ export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoD
     setAdicionaisSelecionados([])
     setDataEntrega(undefined)
     setTipoEntrega("retirada")
+    setHorarioSelecionado("")
     setEndereco({ rua: "", bairro: "", numero: "", complemento: "" })
     setHorarioEntrega("")
   }
@@ -168,13 +168,13 @@ export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoD
     if (etapa === 2 && quantidadeRecheios === 0) return false
     if (etapa === 3 && recheiosSelecionados.length === 0) return false
     if (etapa === 5 && !dataEntrega) return false
+    if (etapa === 6 && !horarioSelecionado) return false
     if (
       etapa === 6 &&
       tipoEntrega === "entrega" &&
       (!endereco.rua || !endereco.bairro || !endereco.numero || !endereco.complemento)
     )
       return false
-    if (etapa === 6 && tipoEntrega === "entrega" && !horarioEntrega) return false
     return true
   }
 
@@ -341,7 +341,10 @@ export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoD
               <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Entrega ou Retirada</h3>
               <RadioGroup
                 value={tipoEntrega}
-                onValueChange={(value: "retirada" | "entrega") => setTipoEntrega(value)}
+                onValueChange={(value: "retirada" | "entrega") => {
+                  setTipoEntrega(value)
+                  setHorarioSelecionado("") // Reseta o horário ao mudar o tipo de entrega
+                }}
                 className="space-y-2"
               >
                 <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
@@ -357,51 +360,51 @@ export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoD
                   </Label>
                 </div>
               </RadioGroup>
+
+              <div className="space-y-2">
+                <Label htmlFor="horario" className={`${sour_candy.className} text-sm font-medium`}>
+                  {tipoEntrega === "retirada" ? "Horário de Retirada" : "Horário de Entrega"}
+                </Label>
+                <Select value={horarioSelecionado} onValueChange={setHorarioSelecionado}>
+                  <SelectTrigger id="horario" className="w-full">
+                    <SelectValue placeholder="Selecione um horário" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(tipoEntrega === "retirada" ? horariosRetirada : horariosEntrega).map((horario) => (
+                      <SelectItem key={horario} value={horario}>
+                        {horario}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
               {tipoEntrega === "entrega" && (
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="horario-entrega" className={`${sour_candy.className} text-sm font-medium`}>
-                      Horário de Entrega
-                    </Label>
-                    <Select value={horarioEntrega} onValueChange={setHorarioEntrega}>
-                      <SelectTrigger id="horario-entrega" className="w-full">
-                        <SelectValue placeholder="Selecione um horário" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {horariosEntrega.map((horario) => (
-                          <SelectItem key={horario} value={horario}>
-                            {horario}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Input
-                      placeholder="Rua"
-                      value={endereco.rua}
-                      onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })}
-                      className="w-full"
-                    />
-                    <Input
-                      placeholder="Bairro"
-                      value={endereco.bairro}
-                      onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
-                      className="w-full"
-                    />
-                    <Input
-                      placeholder="Número"
-                      value={endereco.numero}
-                      onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
-                      className="w-full"
-                    />
-                    <Input
-                      placeholder="Complemento"
-                      value={endereco.complemento}
-                      onChange={(e) => setEndereco({ ...endereco, complemento: e.target.value })}
-                      className="w-full"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <Input
+                    placeholder="Rua"
+                    value={endereco.rua}
+                    onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })}
+                    className="w-full"
+                  />
+                  <Input
+                    placeholder="Bairro"
+                    value={endereco.bairro}
+                    onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
+                    className="w-full"
+                  />
+                  <Input
+                    placeholder="Número"
+                    value={endereco.numero}
+                    onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
+                    className="w-full"
+                  />
+                  <Input
+                    placeholder="Complemento"
+                    value={endereco.complemento}
+                    onChange={(e) => setEndereco({ ...endereco, complemento: e.target.value })}
+                    className="w-full"
+                  />
                 </div>
               )}
             </div>
@@ -435,3 +438,4 @@ export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoD
     </Dialog>
   )
 }
+

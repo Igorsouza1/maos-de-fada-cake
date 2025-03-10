@@ -11,6 +11,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { format, addDays, isBefore } from "date-fns"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] })
 const sour_candy = Sour_Candy({ weight: "400", subsets: ["latin"] })
@@ -28,6 +29,10 @@ const quantidades = [
   { id: "150", nome: "150 docinhos", preco: 210 },
 ]
 
+// Add these constants for pickup and delivery times
+const horariosRetirada = ["11:00", "12:00", "15:00", "18:00", "19:00"]
+const horariosEntrega = ["13:30", "17:30", "18:00", "19:00"]
+
 interface Produto {
   id: string
   nome: string
@@ -36,6 +41,7 @@ interface Produto {
   preco: number
   dataEntrega: string
   tipoEntrega: "retirada" | "entrega"
+  horario: string
   endereco: { rua: string; bairro: string; numero: string; complemento: string } | null
   imagens: { src: string; alt: string; description: string; name: string; price: number }[]
 }
@@ -52,6 +58,7 @@ export function DocinhosDialog({ isOpen, onClose, onAddToCart }: DocinhosDialogP
   const [quantidadeSelecionada, setQuantidadeSelecionada] = useState<string>("")
   const [dataEntrega, setDataEntrega] = useState<Date | undefined>(undefined)
   const [tipoEntrega, setTipoEntrega] = useState<"retirada" | "entrega">("retirada")
+  const [horarioSelecionado, setHorarioSelecionado] = useState<string>("")
   const [endereco, setEndereco] = useState({ rua: "", bairro: "", numero: "", complemento: "" })
 
   const avancarEtapa = () => {
@@ -68,6 +75,7 @@ export function DocinhosDialog({ isOpen, onClose, onAddToCart }: DocinhosDialogP
     if (etapa === 1 && saboresSelecionados.length === 0) return false
     if (etapa === 2 && !quantidadeSelecionada) return false
     if (etapa === 3 && !dataEntrega) return false
+    if (etapa === 4 && !horarioSelecionado) return false
     if (etapa === 4 && tipoEntrega === "entrega" && (!endereco.rua || !endereco.bairro || !endereco.numero))
       return false
     return true
@@ -87,6 +95,7 @@ export function DocinhosDialog({ isOpen, onClose, onAddToCart }: DocinhosDialogP
       preco: quantidadeObj.preco + adicionalNinhoNutella,
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       tipoEntrega,
+      horario: horarioSelecionado,
       endereco: tipoEntrega === "entrega" ? endereco : null,
       imagens: [
         {
@@ -109,6 +118,7 @@ export function DocinhosDialog({ isOpen, onClose, onAddToCart }: DocinhosDialogP
     setQuantidadeSelecionada("")
     setDataEntrega(undefined)
     setTipoEntrega("retirada")
+    setHorarioSelecionado("")
     setEndereco({ rua: "", bairro: "", numero: "", complemento: "" })
   }
 
@@ -194,7 +204,10 @@ export function DocinhosDialog({ isOpen, onClose, onAddToCart }: DocinhosDialogP
                 <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Entrega ou Retirada</h3>
                 <RadioGroup
                   value={tipoEntrega}
-                  onValueChange={(value: "retirada" | "entrega") => setTipoEntrega(value)}
+                  onValueChange={(value: "retirada" | "entrega") => {
+                    setTipoEntrega(value)
+                    setHorarioSelecionado("")
+                  }}
                   className="space-y-2"
                 >
                   <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
@@ -210,6 +223,23 @@ export function DocinhosDialog({ isOpen, onClose, onAddToCart }: DocinhosDialogP
                     </Label>
                   </div>
                 </RadioGroup>
+                <div className="space-y-2">
+                  <Label htmlFor="horario" className={`${sour_candy.className} text-sm font-medium`}>
+                    {tipoEntrega === "retirada" ? "Horário de Retirada" : "Horário de Entrega"}
+                  </Label>
+                  <Select value={horarioSelecionado} onValueChange={setHorarioSelecionado}>
+                    <SelectTrigger id="horario" className="w-full">
+                      <SelectValue placeholder="Selecione um horário" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(tipoEntrega === "retirada" ? horariosRetirada : horariosEntrega).map((horario) => (
+                        <SelectItem key={horario} value={horario}>
+                          {horario}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 {tipoEntrega === "entrega" && (
                   <div className="space-y-2">
                     <Input

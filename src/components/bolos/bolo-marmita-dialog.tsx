@@ -7,7 +7,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
-import { Separator } from "@/components/ui/separator" 
+import { Separator } from "@/components/ui/separator"
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { format, addDays, isBefore } from "date-fns"
@@ -36,6 +36,10 @@ const recheiosGourmet = [
   { nome: "Recheio Ouro Branco", adicional: 25 },
 ]
 
+// Add these constants for pickup and delivery times
+const horariosRetirada = ["11:00", "12:00", "15:00", "18:00", "19:00"]
+const horariosEntrega = ["13:30", "17:30", "18:00", "19:00"]
+
 interface Produto {
   id: string
   nome: string
@@ -49,7 +53,7 @@ interface Produto {
   tipoEntrega: "retirada" | "entrega"
   endereco: { rua: string; bairro: string; numero: string; complemento: string } | null
   imagens: { src: string; alt: string; description: string; name: string; price: number }[]
-  horaEntrega?: string
+  horario: string // Add this field for the selected time
 }
 
 interface BoloMarmitaDialogProps {
@@ -69,18 +73,7 @@ export function BoloMarmitaDialog({ isOpen, onClose, onAddToCart }: BoloMarmitaD
   const [dataEntrega, setDataEntrega] = useState<Date | undefined>(undefined)
   const [tipoEntrega, setTipoEntrega] = useState<"retirada" | "entrega">("retirada")
   const [endereco, setEndereco] = useState({ rua: "", bairro: "", numero: "", complemento: "" })
-  const [horarioEntrega, setHorarioEntrega] = useState<string>("")
-
-  const horariosEntrega = [
-    "09:00 - 10:00",
-    "10:00 - 11:00",
-    "11:00 - 12:00",
-    "14:00 - 15:00",
-    "15:00 - 16:00",
-    "16:00 - 17:00",
-    "17:00 - 18:00",
-    "18:00 - 19:00"
-  ]
+  const [horarioSelecionado, setHorarioSelecionado] = useState<string>("") // New state for selected time
 
   const avancarEtapa = () => {
     setEtapa(etapa + 1)
@@ -113,6 +106,7 @@ export function BoloMarmitaDialog({ isOpen, onClose, onAddToCart }: BoloMarmitaD
     )
       return false
     if (etapa === 5 && !dataEntrega) return false
+    if (etapa === 6 && !horarioSelecionado) return false // Add validation for selected time
     if (etapa === 6 && tipoEntrega === "entrega" && (!endereco.rua || !endereco.bairro || !endereco.numero))
       return false
     return true
@@ -125,7 +119,11 @@ export function BoloMarmitaDialog({ isOpen, onClose, onAddToCart }: BoloMarmitaD
       massa: massaSelecionada,
       recheios: recheiosSelecionados,
       adicionais: adicionarBrigadeiros ? ["Brigadeiros"] : [],
-      quantidadeBrigadeiros: adicionarBrigadeiros ? (typeof quantidadeBrigadeiros === "number" ? quantidadeBrigadeiros : 0) : 0,
+      quantidadeBrigadeiros: adicionarBrigadeiros
+        ? typeof quantidadeBrigadeiros === "number"
+          ? quantidadeBrigadeiros
+          : 0
+        : 0,
       preco: calcularPrecoTotal(),
       quantidade: typeof quantidade === "number" ? quantidade : 0,
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
@@ -140,6 +138,7 @@ export function BoloMarmitaDialog({ isOpen, onClose, onAddToCart }: BoloMarmitaD
           price: 8,
         },
       ],
+      horario: horarioSelecionado, // Add the selected time to the product
     }
     onAddToCart(produto)
     onClose()
@@ -157,6 +156,7 @@ export function BoloMarmitaDialog({ isOpen, onClose, onAddToCart }: BoloMarmitaD
     setDataEntrega(undefined)
     setTipoEntrega("retirada")
     setEndereco({ rua: "", bairro: "", numero: "", complemento: "" })
+    setHorarioSelecionado("") // Reset the selected time
   }
 
   return (
@@ -362,7 +362,10 @@ export function BoloMarmitaDialog({ isOpen, onClose, onAddToCart }: BoloMarmitaD
                 <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Entrega ou Retirada</h3>
                 <RadioGroup
                   value={tipoEntrega}
-                  onValueChange={(value: "retirada" | "entrega") => setTipoEntrega(value)}
+                  onValueChange={(value: "retirada" | "entrega") => {
+                    setTipoEntrega(value)
+                    setHorarioSelecionado("") // Reset the selected time when changing delivery type
+                  }}
                   className="space-y-2"
                 >
                   <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
@@ -378,23 +381,25 @@ export function BoloMarmitaDialog({ isOpen, onClose, onAddToCart }: BoloMarmitaD
                     </Label>
                   </div>
                 </RadioGroup>
+                <div className="space-y-2">
+                  <Label htmlFor="horario" className={`${sour_candy.className} text-sm font-medium`}>
+                    {tipoEntrega === "retirada" ? "Horário de Retirada" : "Horário de Entrega"}
+                  </Label>
+                  <Select value={horarioSelecionado} onValueChange={setHorarioSelecionado}>
+                    <SelectTrigger id="horario" className="w-full">
+                      <SelectValue placeholder="Selecione um horário" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(tipoEntrega === "retirada" ? horariosRetirada : horariosEntrega).map((horario) => (
+                        <SelectItem key={horario} value={horario}>
+                          {horario}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 {tipoEntrega === "entrega" && (
                   <div className="space-y-2">
-                      <Label htmlFor="horario-entrega" className={`${sour_candy.className} text-sm font-medium`}>
-                        Horário de Entrega
-                      </Label>
-                      <Select value={horarioEntrega} onValueChange={setHorarioEntrega}>
-                        <SelectTrigger id="horario-entrega" className="w-full">
-                          <SelectValue placeholder="Selecione um horário" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {horariosEntrega.map((horario) => (
-                            <SelectItem key={horario} value={horario}>
-                              {horario}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
                     <Input
                       placeholder="Rua"
                       value={endereco.rua}

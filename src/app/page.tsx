@@ -59,6 +59,7 @@ interface Produto {
   quantidade?: number
   tipo?: string
   cobertura?: string // Add this for Bolo Piscina
+  horario?: string // Add this line
 }
 
 const produtos: Produto[] = [
@@ -398,6 +399,10 @@ export default function CardapioDigital() {
         mensagem += `   Tipo de Entrega: ${item.tipoEntrega}\n`
       }
 
+      if (item.horario) {
+        mensagem += `   Horário: ${item.horario}\n`
+      }
+
       if (item.endereco) {
         mensagem += `   Endereço de Entrega: ${item.endereco.rua}, ${item.endereco.numero}, ${item.endereco.bairro}, ${item.endereco.complemento}\n`
       }
@@ -491,6 +496,7 @@ export default function CardapioDigital() {
                       )}
                       {item.dataEntrega && <p className="text-sm mt-1">Data de Entrega: {item.dataEntrega}</p>}
                       {item.tipoEntrega && <p className="text-sm mt-1">Tipo de Entrega: {item.tipoEntrega}</p>}
+                      {item.horario && <p className="text-sm mt-1">Horário: {item.horario}</p>}
                       {item.endereco && (
                         <p className="text-sm mt-1">
                           Endereço: {item.endereco.rua}, {item.endereco.numero}, {item.endereco.bairro},{" "}

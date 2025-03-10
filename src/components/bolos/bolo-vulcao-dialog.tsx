@@ -9,6 +9,8 @@ import { Calendar } from "@/components/ui/calendar"
 import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
 import { format, addDays, isBefore } from "date-fns"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] })
 const sour_candy = Sour_Candy({ weight: "400", subsets: ["latin"] })
@@ -22,6 +24,10 @@ const recheios = ["Leite Ninho", "Brigadeiro"]
 
 const massas = ["Baunilha", "Cenoura", "Chocolate"]
 
+// Add these constants for pickup and delivery times
+const horariosRetirada = ["11:00", "12:00", "15:00", "18:00", "19:00"]
+const horariosEntrega = ["13:30", "17:30", "18:00", "19:00"]
+
 interface Produto {
   id: string
   nome: string
@@ -30,6 +36,14 @@ interface Produto {
   massa: string
   preco: number
   dataEntrega: string
+  tipoEntrega: "retirada" | "entrega"
+  horario: string
+  endereco?: {
+    rua: string
+    bairro: string
+    numero: string
+    complemento: string
+  } | null
   imagens: { src: string; alt: string; description: string; name: string; price: number }[]
 }
 
@@ -45,6 +59,9 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
   const [recheio, setRecheio] = useState<string>("")
   const [massa, setMassa] = useState<string>("")
   const [dataEntrega, setDataEntrega] = useState<Date | undefined>(undefined)
+  const [tipoEntrega, setTipoEntrega] = useState<"retirada" | "entrega">("retirada")
+  const [horarioSelecionado, setHorarioSelecionado] = useState<string>("")
+  const [endereco, setEndereco] = useState({ rua: "", bairro: "", numero: "", complemento: "" })
 
   const dataMinima = addDays(new Date(), 4)
 
@@ -60,6 +77,9 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
       massa: massa,
       preco: tamanhoSelecionado.preco,
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
+      tipoEntrega: tipoEntrega,
+      horario: horarioSelecionado,
+      endereco: tipoEntrega === "entrega" ? endereco : null,
       imagens: [
         {
           src: "/bolo-vulcao.jpg",
@@ -81,10 +101,13 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
     setRecheio("")
     setMassa("")
     setDataEntrega(undefined)
+    setTipoEntrega("retirada")
+    setHorarioSelecionado("")
+    setEndereco({ rua: "", bairro: "", numero: "", complemento: "" })
   }
 
   const nextStep = () => {
-    if (step < 4) {
+    if (step < 5) {
       setStep(step + 1)
     }
   }
@@ -99,7 +122,15 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
     if (step === 1 && !tamanho) return true
     if (step === 2 && !recheio) return true
     if (step === 3 && !massa) return true
+    if (step === 4 && !dataEntrega) return true
     return false
+  }
+
+  const isFormValid = () => {
+    if (!tamanho || !recheio || !massa || !dataEntrega || !horarioSelecionado) return false
+    if (tipoEntrega === "entrega" && (!endereco.rua || !endereco.bairro || !endereco.numero || !endereco.complemento))
+      return false
+    return true
   }
 
   return (
@@ -177,6 +208,77 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
                 </div>
               </div>
             )}
+            {step === 5 && (
+              <div className="space-y-4">
+                <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Entrega ou Retirada</h3>
+                <RadioGroup
+                  value={tipoEntrega}
+                  onValueChange={(value: "retirada" | "entrega") => {
+                    setTipoEntrega(value)
+                    setHorarioSelecionado("")
+                  }}
+                  className="space-y-2"
+                >
+                  <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
+                    <RadioGroupItem value="retirada" id="retirada" />
+                    <Label htmlFor="retirada" className={`${sour_candy.className} text-lg flex-grow`}>
+                      Retirar no local
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
+                    <RadioGroupItem value="entrega" id="entrega" />
+                    <Label htmlFor="entrega" className={`${sour_candy.className} text-lg flex-grow`}>
+                      Entrega
+                    </Label>
+                  </div>
+                </RadioGroup>
+                <div className="space-y-2">
+                  <Label htmlFor="horario" className={`${sour_candy.className} text-sm font-medium`}>
+                    {tipoEntrega === "retirada" ? "Horário de Retirada" : "Horário de Entrega"}
+                  </Label>
+                  <Select value={horarioSelecionado} onValueChange={setHorarioSelecionado}>
+                    <SelectTrigger id="horario" className="w-full">
+                      <SelectValue placeholder="Selecione um horário" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(tipoEntrega === "retirada" ? horariosRetirada : horariosEntrega).map((horario) => (
+                        <SelectItem key={horario} value={horario}>
+                          {horario}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                {tipoEntrega === "entrega" && (
+                  <div className="space-y-2">
+                    <Input
+                      placeholder="Rua"
+                      value={endereco.rua}
+                      onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })}
+                      className="w-full"
+                    />
+                    <Input
+                      placeholder="Bairro"
+                      value={endereco.bairro}
+                      onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
+                      className="w-full"
+                    />
+                    <Input
+                      placeholder="Número"
+                      value={endereco.numero}
+                      onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
+                      className="w-full"
+                    />
+                    <Input
+                      placeholder="Complemento"
+                      value={endereco.complemento}
+                      onChange={(e) => setEndereco({ ...endereco, complemento: e.target.value })}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </ScrollArea>
         <DialogFooter className="p-6 bg-white border-t">
@@ -186,7 +288,7 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
                 Voltar
               </Button>
             )}
-            {step < 4 ? (
+            {step < 5 ? (
               <Button
                 onClick={nextStep}
                 className="bg-pink-500 hover:bg-pink-600 text-white ml-auto"
@@ -198,7 +300,7 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
               <Button
                 onClick={handleAddToCart}
                 className="bg-pink-500 hover:bg-pink-600 text-white ml-auto"
-                disabled={!dataEntrega}
+                disabled={!isFormValid()}
               >
                 Adicionar ao Carrinho
               </Button>

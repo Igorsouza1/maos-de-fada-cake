@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { format, addDays, isBefore } from "date-fns"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] })
 const sour_candy = Sour_Candy({ weight: "400", subsets: ["latin"] })
@@ -47,10 +48,14 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
+// Add these constants for pickup and delivery times
+const horariosRetirada = ["11:00", "12:00", "15:00", "18:00", "19:00"]
+const horariosEntrega = ["13:30", "17:30", "18:00", "19:00"]
+
 interface Produto {
   id: string
   nome: string
-  descricao?: string // Make descricao optional
+  descricao?: string
   preco: number
   imagens: { src: string; alt: string; description: string; name: string; price: number }[]
   massa?: string
@@ -68,7 +73,8 @@ interface Produto {
   observacao?: string
   quantidade?: number
   tipo?: string
-  cobertura?: string // Add this for Bolo Piscina
+  cobertura?: string
+  horario?: string // Add this field for the selected time
 }
 
 interface BoloMetroDialogProps {
@@ -76,8 +82,6 @@ interface BoloMetroDialogProps {
   onClose: () => void
   onAddToCart: (produto: Produto) => void
 }
-
-
 
 export function BoloMetroDialog({ isOpen, onClose, onAddToCart }: BoloMetroDialogProps) {
   const [etapa, setEtapa] = useState(1)
@@ -89,6 +93,7 @@ export function BoloMetroDialog({ isOpen, onClose, onAddToCart }: BoloMetroDialo
   const [dataEntrega, setDataEntrega] = useState<Date | undefined>(undefined)
   const [tipoEntrega, setTipoEntrega] = useState<"retirada" | "entrega">("retirada")
   const [endereco, setEndereco] = useState({ rua: "", bairro: "", numero: "", complemento: "" })
+  const [horarioSelecionado, setHorarioSelecionado] = useState<string>("") // New state for selected time
 
   const avancarEtapa = () => {
     setEtapa(etapa + 1)
@@ -122,14 +127,17 @@ export function BoloMetroDialog({ isOpen, onClose, onAddToCart }: BoloMetroDialo
       preco: calcularPrecoTotal(),
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       tipoEntrega,
+      horario: horarioSelecionado, // Add the selected time to the product
       endereco: tipoEntrega === "entrega" ? endereco : null,
-      imagens: [{ 
-        src: "/bolo-metro.jpg", 
-        alt: "Bolo de Metro", 
-        description: "Bolo de Metro Personalizado", 
-        name: "Bolo de Metro", 
-        price: calcularPrecoTotal()
-      }],
+      imagens: [
+        {
+          src: "/bolo-metro.jpg",
+          alt: "Bolo de Metro",
+          description: "Bolo de Metro Personalizado",
+          name: "Bolo de Metro",
+          price: calcularPrecoTotal(),
+        },
+      ],
     }
     onAddToCart(produto)
     onClose()
@@ -146,6 +154,7 @@ export function BoloMetroDialog({ isOpen, onClose, onAddToCart }: BoloMetroDialo
     setDataEntrega(undefined)
     setTipoEntrega("retirada")
     setEndereco({ rua: "", bairro: "", numero: "", complemento: "" })
+    setHorarioSelecionado("") // Reset the selected time
   }
 
   const isFormValid = () => {
@@ -154,6 +163,7 @@ export function BoloMetroDialog({ isOpen, onClose, onAddToCart }: BoloMetroDialo
     if (etapa === 3 && quantidadeRecheios === 0) return false
     if (etapa === 4 && recheiosSelecionados.length === 0) return false
     if (etapa === 6 && !dataEntrega) return false
+    if (etapa === 7 && !horarioSelecionado) return false // Add validation for selected time
     if (
       etapa === 7 &&
       tipoEntrega === "entrega" &&
@@ -346,7 +356,10 @@ export function BoloMetroDialog({ isOpen, onClose, onAddToCart }: BoloMetroDialo
               <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Entrega ou Retirada</h3>
               <RadioGroup
                 value={tipoEntrega}
-                onValueChange={(value: "retirada" | "entrega") => setTipoEntrega(value)}
+                onValueChange={(value: "retirada" | "entrega") => {
+                  setTipoEntrega(value)
+                  setHorarioSelecionado("") // Reset the selected time when changing delivery type
+                }}
                 className="space-y-2"
               >
                 <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
@@ -362,6 +375,23 @@ export function BoloMetroDialog({ isOpen, onClose, onAddToCart }: BoloMetroDialo
                   </Label>
                 </div>
               </RadioGroup>
+              <div className="space-y-2">
+                <Label htmlFor="horario" className={`${sour_candy.className} text-sm font-medium`}>
+                  {tipoEntrega === "retirada" ? "Horário de Retirada" : "Horário de Entrega"}
+                </Label>
+                <Select value={horarioSelecionado} onValueChange={setHorarioSelecionado}>
+                  <SelectTrigger id="horario" className="w-full">
+                    <SelectValue placeholder="Selecione um horário" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {(tipoEntrega === "retirada" ? horariosRetirada : horariosEntrega).map((horario) => (
+                      <SelectItem key={horario} value={horario}>
+                        {horario}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               {tipoEntrega === "entrega" && (
                 <div className="space-y-2">
                   <Input

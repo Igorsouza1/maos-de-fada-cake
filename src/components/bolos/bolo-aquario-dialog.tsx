@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
+import { Pacifico, Sour_Gummy } from "next/font/google"
 import { Separator } from "@/components/ui/separator"
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
@@ -14,7 +14,7 @@ import { format, addDays, isBefore } from "date-fns"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] })
-const sour_candy = Sour_Candy({ weight: "400", subsets: ["latin"] })
+const sour_candy = Sour_Gummy({ weight: "400", subsets: ["latin"] })
 
 const massas = ["Amanteigada", "Chocolate"]
 
@@ -43,6 +43,16 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
+const horariosEntrega = [
+  "09:00 - 10:00",
+  "10:00 - 11:00",
+  "11:00 - 12:00",
+  "14:00 - 15:00",
+  "15:00 - 16:00",
+  "16:00 - 17:00",
+  "17:00 - 18:00",
+]
+
 interface Produto {
   id: string
   nome: string
@@ -51,6 +61,7 @@ interface Produto {
   adicionais: string[]
   preco: number
   dataEntrega: string
+  horarioEntrega: string
   endereco: {
     rua: string
     numero: string
@@ -73,17 +84,8 @@ export function BoloAquarioDialog({ isOpen, onClose, onAddToCart }: BoloAquarioD
   const [recheiosSelecionados, setRecheiosSelecionados] = useState<string[]>([])
   const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<string[]>([])
   const [dataEntrega, setDataEntrega] = useState<Date | undefined>(undefined)
+  const [horarioEntrega, setHorarioEntrega] = useState<string>("")
   const [endereco, setEndereco] = useState({ rua: "", numero: "", bairro: "", complemento: "" })
-
-  const horariosEntrega = [
-  "09:00 - 10:00",
-  "10:00 - 11:00",
-  "11:00 - 12:00",
-  "14:00 - 15:00",
-  "15:00 - 16:00",
-  "16:00 - 17:00",
-  "17:00 - 18:00"
-]
 
   const avancarEtapa = () => {
     setEtapa(etapa + 1)
@@ -115,6 +117,7 @@ export function BoloAquarioDialog({ isOpen, onClose, onAddToCart }: BoloAquarioD
       adicionais: adicionaisSelecionados,
       preco: calcularPrecoTotal(),
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
+      horarioEntrega: horarioEntrega,
       endereco: endereco,
       imagens: [
         {
@@ -145,6 +148,7 @@ export function BoloAquarioDialog({ isOpen, onClose, onAddToCart }: BoloAquarioD
     setRecheiosSelecionados([])
     setAdicionaisSelecionados([])
     setDataEntrega(undefined)
+    setHorarioEntrega("")
     setEndereco({ rua: "", numero: "", bairro: "", complemento: "" })
   }
 
@@ -153,7 +157,7 @@ export function BoloAquarioDialog({ isOpen, onClose, onAddToCart }: BoloAquarioD
     if (etapa === 2 && quantidadeRecheios === 0) return false
     if (etapa === 3 && recheiosSelecionados.length === 0) return false
     if (etapa === 5 && !dataEntrega) return false
-    if (etapa === 6 && (!endereco.rua || !endereco.numero || !endereco.bairro)) return false
+    if (etapa === 6 && (!endereco.rua || !endereco.numero || !endereco.bairro || !horarioEntrega)) return false
     return true
   }
 
@@ -320,12 +324,14 @@ export function BoloAquarioDialog({ isOpen, onClose, onAddToCart }: BoloAquarioD
 
           {etapa === 6 && (
             <div className="space-y-4">
-              <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Endereço de Entrega</h3>
+              <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>
+                Endereço e Horário de Entrega
+              </h3>
               <p className={`${sour_candy.className} text-sm text-center text-pink-500`}>
-                Preencha o endereço para entrega do seu bolo. 
+                Preencha o endereço para entrega do seu bolo e escolha o melhor horário.
               </p>
-              <p className={`${sour_candy.className} text-sm text-center text-pink-500`}>
-                OBS: A entrega e topper são gratuitos 
+              <p className={`${sour_candy.className} text-sm text-center text-pink-500 font-bold`}>
+                OBS: A entrega e topper são gratuitos para o Bolo Aquário!
               </p>
               <div className="space-y-2">
                 <Input
@@ -352,6 +358,18 @@ export function BoloAquarioDialog({ isOpen, onClose, onAddToCart }: BoloAquarioD
                   onChange={(e) => setEndereco({ ...endereco, complemento: e.target.value })}
                   className="w-full"
                 />
+                <Select value={horarioEntrega} onValueChange={setHorarioEntrega}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Selecione o horário de entrega" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {horariosEntrega.map((horario) => (
+                      <SelectItem key={horario} value={horario}>
+                        {horario}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
           )}
