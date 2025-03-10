@@ -6,10 +6,11 @@ import { Button } from "@/components/ui/button"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
+import { Pacifico, Sour_Gummy as Sour_Candy } from 'next/font/google'
 import { Separator } from "@/components/ui/separator"
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { format } from "date-fns"
 import { addDays, isBefore } from "date-fns"
 
@@ -53,10 +54,22 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
+// Adicione os horários de entrega disponíveis
+const horariosEntrega = [
+  "09:00 - 10:00",
+  "10:00 - 11:00",
+  "11:00 - 12:00",
+  "14:00 - 15:00",
+  "15:00 - 16:00",
+  "16:00 - 17:00",
+  "17:00 - 18:00",
+  "18:00 - 19:00"
+]
+
 interface Produto {
   id: string
   nome: string
-  descricao?: string // Make descricao optional
+  descricao?: string
   preco: number
   imagens: { src: string; alt: string; description: string; name: string; price: number }[]
   massa?: string
@@ -65,6 +78,7 @@ interface Produto {
   adicionais?: string[]
   dataEntrega?: string
   tipoEntrega?: "retirada" | "entrega"
+  horarioEntrega?: string // Adicione o horário de entrega
   endereco?: {
     rua: string
     bairro: string
@@ -74,7 +88,8 @@ interface Produto {
   observacao?: string
   quantidade?: number
   tipo?: string
-  cobertura?: string // Add this for Bolo Piscina
+  cobertura?: string
+  topper?: string | null
 }
 
 interface BoloRedondoDialogProps {
@@ -83,7 +98,11 @@ interface BoloRedondoDialogProps {
   onAddToCart: (produto: Produto) => void
 }
 
-
+// Modifique a constante tiposBolo para topperOpcoes
+const topperOpcoes = [
+  { id: "simples", nome: "Simples", precos: { "17cm": 15, "23cm": 18, "28cm": 20 } },
+  { id: "3d", nome: "3D", precos: { "17cm": 25, "23cm": 30, "28cm": 35 } },
+]
 
 export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoDialogProps) {
   const [etapa, setEtapa] = useState(1)
@@ -92,9 +111,13 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
   const [quantidadeRecheios, setQuantidadeRecheios] = useState<number>(1)
   const [recheiosSelecionados, setRecheiosSelecionados] = useState<string[]>([])
   const [tamanho, setTamanho] = useState<string>("")
+  // Substitua o estado tipoBolo por estes dois estados
+  const [querTopper, setQuerTopper] = useState<boolean | null>(null)
+  const [topperTipo, setTopperTipo] = useState<string>("")
   const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<string[]>([])
   const [dataEntrega, setDataEntrega] = useState<Date | undefined>(undefined)
   const [tipoEntrega, setTipoEntrega] = useState<"retirada" | "entrega">("retirada")
+  const [horarioEntrega, setHorarioEntrega] = useState<string>("") // Adicione o estado para o horário de entrega
   const [endereco, setEndereco] = useState({ rua: "", bairro: "", numero: "", complemento: "" })
 
   const avancarEtapa = () => {
@@ -105,6 +128,7 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
     setEtapa(etapa - 1)
   }
 
+  // Modifique a função calcularPrecoTotal para usar querTopper e topperTipo
   const calcularPrecoTotal = () => {
     const precoBase = tamanhos.find((t) => t.id === tamanho)?.preco || 0
     const precoRecheiosGourmet = recheiosSelecionados
@@ -113,19 +137,34 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
     const precoAdicionais = adicionaisSelecionados
       .map((a) => adicionais.find((ad) => ad.nome === a)?.preco || 0)
       .reduce((a, b) => a + b, 0)
-    return precoBase + precoRecheiosGourmet + precoAdicionais + (quantidadeRecheios === 2 ? 10 : 0)
+
+    // Adicione o preço do topper apenas se querTopper for true
+    let precoTopper = 0
+    if (querTopper && topperTipo && tamanho) {
+      const topperSelecionado = topperOpcoes.find((t) => t.id === topperTipo)
+      precoTopper = topperSelecionado
+        ? topperSelecionado.precos[tamanho as keyof typeof topperSelecionado.precos] || 0
+        : 0
+    }
+
+    return precoBase + precoRecheiosGourmet + precoAdicionais + (quantidadeRecheios === 2 ? 10 : 0) + precoTopper
   }
 
   const dataMinima = addDays(new Date(), 4)
 
+  // Modifique a função isFormValid para validar querTopper e topperTipo
   const isFormValid = () => {
     if (etapa === 1 && !massaSelecionada) return false
     if (etapa === 2 && quantidadeRecheios === 0) return false
     if (etapa === 3 && recheiosSelecionados.length === 0) return false
     if (etapa === 4 && !tamanho) return false
-    if (etapa === 6 && !dataEntrega) return false
+    if (etapa === 5 && querTopper === null) return false
+    if (etapa === 5 && querTopper === true && !topperTipo) return false
+    // Remova a validação da etapa 6 (adicionais), pois são opcionais
+    if (etapa === 7 && !dataEntrega) return false
+    if (etapa === 8 && tipoEntrega === "entrega" && !horarioEntrega) return false // Adicione validação para o horário
     if (
-      etapa === 7 &&
+      etapa === 8 &&
       tipoEntrega === "entrega" &&
       (!endereco.rua || !endereco.bairro || !endereco.numero || !endereco.complemento)
     )
@@ -133,6 +172,7 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
     return true
   }
 
+  // Modifique a função handleAddToCart para incluir o topper e o horário de entrega
   const handleAddToCart = () => {
     const produto: Produto = {
       id: `bolo-redondo-${Date.now()}`,
@@ -141,26 +181,40 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
       tamanho: tamanhos.find((t) => t.id === tamanho)?.nome,
       recheios: recheiosSelecionados,
       adicionais: adicionaisSelecionados,
+      topper: querTopper ? topperOpcoes.find((t) => t.id === topperTipo)?.nome : null,
       preco: calcularPrecoTotal(),
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       tipoEntrega,
+      horarioEntrega: tipoEntrega === "entrega" ? horarioEntrega : undefined, // Adicione o horário de entrega
       endereco: tipoEntrega === "entrega" ? endereco : null,
-      imagens: [{ src: "/bolo-redondo.jpg", alt: "Bolo Redondo", description: "Bolo Redondo Personalizado", name: "Bolo Redondo", price: calcularPrecoTotal() }],
+      imagens: [
+        {
+          src: "/bolo-redondo.jpg",
+          alt: "Bolo Redondo",
+          description: "Bolo Redondo Personalizado",
+          name: "Bolo Redondo",
+          price: calcularPrecoTotal(),
+        },
+      ],
     }
     onAddToCart(produto)
     onClose()
     resetForm()
   }
 
+  // Modifique a função resetForm para incluir o reset do horário de entrega
   const resetForm = () => {
     setEtapa(1)
     setMassaSelecionada("")
     setQuantidadeRecheios(1)
     setRecheiosSelecionados([])
     setTamanho("")
+    setQuerTopper(null)
+    setTopperTipo("")
     setAdicionaisSelecionados([])
     setDataEntrega(undefined)
     setTipoEntrega("retirada")
+    setHorarioEntrega("") // Reset do horário de entrega
     setEndereco({ rua: "", bairro: "", numero: "", complemento: "" })
   }
 
@@ -298,6 +352,55 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
 
           {etapa === 5 && (
             <div className="space-y-4">
+              <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>
+                Deseja adicionar um Topper?
+              </h3>
+              <RadioGroup
+                value={querTopper ? "sim" : querTopper === false ? "nao" : ""}
+                onValueChange={(value) => setQuerTopper(value === "sim")}
+                className="space-y-2"
+              >
+                <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
+                  <RadioGroupItem value="sim" id="topper-sim" />
+                  <Label htmlFor="topper-sim" className={`${sour_candy.className} text-lg flex-grow`}>
+                    Sim, quero um topper
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
+                  <RadioGroupItem value="nao" id="topper-nao" />
+                  <Label htmlFor="topper-nao" className={`${sour_candy.className} text-lg flex-grow`}>
+                    Não, obrigado
+                  </Label>
+                </div>
+              </RadioGroup>
+
+              {querTopper && (
+                <div className="mt-4 space-y-4">
+                  <h4 className={`${sour_candy.className} text-xl text-pink-500 font-semibold`}>
+                    Escolha o tipo de Topper:
+                  </h4>
+                  <RadioGroup value={topperTipo} onValueChange={setTopperTipo} className="space-y-2">
+                    {topperOpcoes.map((tipo) => (
+                      <div key={tipo.id} className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
+                        <RadioGroupItem value={tipo.id} id={tipo.id} />
+                        <Label htmlFor={tipo.id} className={`${sour_candy.className} text-sm flex-grow`}>
+                          {tipo.nome}
+                        </Label>
+                        <span className="text-pink-600 font-semibold">
+                          {tamanho
+                            ? `R$${tipo.precos[tamanho as keyof typeof tipo.precos]?.toFixed(2) || "0.00"}`
+                            : "Selecione um tamanho primeiro"}
+                        </span>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+              )}
+            </div>
+          )}
+
+          {etapa === 6 && (
+            <div className="space-y-4">
               <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Adicionais</h3>
               <div className="grid grid-cols-1 gap-2">
                 {adicionais.map((adicional) => (
@@ -324,7 +427,7 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
             </div>
           )}
 
-          {etapa === 6 && (
+          {etapa === 7 && (
             <div className="space-y-4">
               <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Data de Entrega</h3>
               <p className={`${sour_candy.className} text-sm text-center text-pink-500`}>
@@ -342,12 +445,17 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
             </div>
           )}
 
-          {etapa === 7 && (
+          {etapa === 8 && (
             <div className="space-y-4">
               <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Entrega ou Retirada</h3>
               <RadioGroup
                 value={tipoEntrega}
-                onValueChange={(value: "retirada" | "entrega") => setTipoEntrega(value)}
+                onValueChange={(value: "retirada" | "entrega") => {
+                  setTipoEntrega(value);
+                  if (value === "retirada") {
+                    setHorarioEntrega(""); // Limpa o horário se mudar para retirada
+                  }
+                }}
                 className="space-y-2"
               >
                 <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
@@ -364,31 +472,72 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
                 </div>
               </RadioGroup>
               {tipoEntrega === "entrega" && (
-                <div className="space-y-2">
-                  <Input
-                    placeholder="Rua"
-                    value={endereco.rua}
-                    onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })}
-                    className="w-full"
-                  />
-                  <Input
-                    placeholder="Bairro"
-                    value={endereco.bairro}
-                    onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
-                    className="w-full"
-                  />
-                  <Input
-                    placeholder="Número"
-                    value={endereco.numero}
-                    onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
-                    className="w-full"
-                  />
-                  <Input
-                    placeholder="Complemento"
-                    value={endereco.complemento}
-                    onChange={(e) => setEndereco({ ...endereco, complemento: e.target.value })}
-                    className="w-full"
-                  />
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="horario-entrega" className={`${sour_candy.className} text-sm font-medium`}>
+                      Horário de Entrega
+                    </Label>
+                    <Select value={horarioEntrega} onValueChange={setHorarioEntrega}>
+                      <SelectTrigger id="horario-entrega" className="w-full">
+                        <SelectValue placeholder="Selecione um horário" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {horariosEntrega.map((horario) => (
+                          <SelectItem key={horario} value={horario}>
+                            {horario}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="rua" className={`${sour_candy.className} text-sm font-medium`}>
+                      Rua
+                    </Label>
+                    <Input
+                      id="rua"
+                      placeholder="Rua"
+                      value={endereco.rua}
+                      onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="bairro" className={`${sour_candy.className} text-sm font-medium`}>
+                      Bairro
+                    </Label>
+                    <Input
+                      id="bairro"
+                      placeholder="Bairro"
+                      value={endereco.bairro}
+                      onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="numero" className={`${sour_candy.className} text-sm font-medium`}>
+                      Número
+                    </Label>
+                    <Input
+                      id="numero"
+                      placeholder="Número"
+                      value={endereco.numero}
+                      onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="complemento" className={`${sour_candy.className} text-sm font-medium`}>
+                      Complemento
+                    </Label>
+                    <Input
+                      id="complemento"
+                      placeholder="Complemento"
+                      value={endereco.complemento}
+                      onChange={(e) => setEndereco({ ...endereco, complemento: e.target.value })}
+                      className="w-full"
+                    />
+                  </div>
                 </div>
               )}
             </div>
@@ -400,7 +549,7 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
               Voltar
             </Button>
           )}
-          {etapa < 7 ? (
+          {etapa < 8 ? (
             <Button
               onClick={avancarEtapa}
               className="bg-pink-500 hover:bg-pink-600 text-white ml-auto"
@@ -422,4 +571,3 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
     </Dialog>
   )
 }
-
