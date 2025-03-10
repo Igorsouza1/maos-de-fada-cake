@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator"
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { format, addDays, isBefore } from "date-fns"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] })
 const sour_candy = Sour_Candy({ weight: "400", subsets: ["latin"] })
@@ -73,6 +74,16 @@ export function BoloAquarioDialog({ isOpen, onClose, onAddToCart }: BoloAquarioD
   const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<string[]>([])
   const [dataEntrega, setDataEntrega] = useState<Date | undefined>(undefined)
   const [endereco, setEndereco] = useState({ rua: "", numero: "", bairro: "", complemento: "" })
+
+  const horariosEntrega = [
+  "09:00 - 10:00",
+  "10:00 - 11:00",
+  "11:00 - 12:00",
+  "14:00 - 15:00",
+  "15:00 - 16:00",
+  "16:00 - 17:00",
+  "17:00 - 18:00"
+]
 
   const avancarEtapa = () => {
     setEtapa(etapa + 1)

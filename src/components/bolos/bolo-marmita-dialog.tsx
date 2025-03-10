@@ -7,11 +7,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Pacifico, Sour_Gummy as Sour_Candy } from "next/font/google"
-import { Separator } from "@/components/ui/separator"
+import { Separator } from "@/components/ui/separator" 
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { format, addDays, isBefore } from "date-fns"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] })
 const sour_candy = Sour_Candy({ weight: "400", subsets: ["latin"] })
@@ -48,6 +49,7 @@ interface Produto {
   tipoEntrega: "retirada" | "entrega"
   endereco: { rua: string; bairro: string; numero: string; complemento: string } | null
   imagens: { src: string; alt: string; description: string; name: string; price: number }[]
+  horaEntrega?: string
 }
 
 interface BoloMarmitaDialogProps {
@@ -67,6 +69,18 @@ export function BoloMarmitaDialog({ isOpen, onClose, onAddToCart }: BoloMarmitaD
   const [dataEntrega, setDataEntrega] = useState<Date | undefined>(undefined)
   const [tipoEntrega, setTipoEntrega] = useState<"retirada" | "entrega">("retirada")
   const [endereco, setEndereco] = useState({ rua: "", bairro: "", numero: "", complemento: "" })
+  const [horarioEntrega, setHorarioEntrega] = useState<string>("")
+
+  const horariosEntrega = [
+    "09:00 - 10:00",
+    "10:00 - 11:00",
+    "11:00 - 12:00",
+    "14:00 - 15:00",
+    "15:00 - 16:00",
+    "16:00 - 17:00",
+    "17:00 - 18:00",
+    "18:00 - 19:00"
+  ]
 
   const avancarEtapa = () => {
     setEtapa(etapa + 1)
@@ -366,6 +380,21 @@ export function BoloMarmitaDialog({ isOpen, onClose, onAddToCart }: BoloMarmitaD
                 </RadioGroup>
                 {tipoEntrega === "entrega" && (
                   <div className="space-y-2">
+                      <Label htmlFor="horario-entrega" className={`${sour_candy.className} text-sm font-medium`}>
+                        Horário de Entrega
+                      </Label>
+                      <Select value={horarioEntrega} onValueChange={setHorarioEntrega}>
+                        <SelectTrigger id="horario-entrega" className="w-full">
+                          <SelectValue placeholder="Selecione um horário" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {horariosEntrega.map((horario) => (
+                            <SelectItem key={horario} value={horario}>
+                              {horario}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     <Input
                       placeholder="Rua"
                       value={endereco.rua}

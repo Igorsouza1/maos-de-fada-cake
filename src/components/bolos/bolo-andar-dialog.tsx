@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator"
 import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { format, addDays, isBefore } from "date-fns"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 const pacifico = Pacifico({ weight: "400", subsets: ["latin"] })
 const sour_candy = Sour_Candy({ weight: "400", subsets: ["latin"] })
@@ -81,6 +82,7 @@ interface Produto {
   quantidade?: number
   tipo?: string
   cobertura?: string // Add this for Bolo Piscina
+  horarioEntrega?: string
 }
 
 interface BoloAndarDialogProps {
@@ -88,8 +90,6 @@ interface BoloAndarDialogProps {
   onClose: () => void
   onAddToCart: (produto: Produto) => void
 }
-
-
 
 export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialogProps) {
   const [etapa, setEtapa] = useState(1)
@@ -100,6 +100,18 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
   const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<string[]>([])
   const [dataEntrega, setDataEntrega] = useState<Date | undefined>(undefined)
   const [endereco, setEndereco] = useState({ rua: "", numero: "", bairro: "", complemento: "" })
+  const [horarioEntrega, setHorarioEntrega] = useState<string>("")
+
+  const horariosEntrega = [
+    "09:00 - 10:00",
+    "10:00 - 11:00",
+    "11:00 - 12:00",
+    "14:00 - 15:00",
+    "15:00 - 16:00",
+    "16:00 - 17:00",
+    "17:00 - 18:00",
+    "18:00 - 19:00"
+  ]
 
   const avancarEtapa = () => {
     setEtapa(etapa + 1)
@@ -133,7 +145,16 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
       preco: calcularPrecoTotal(),
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       endereco: endereco,
-      imagens: [{ src: "/bolo-de-andar.jpg", alt: "Bolo de Andar", description: "Bolo de Andar Personalizado", name: "Bolo de Andar", price: calcularPrecoTotal() }],
+      imagens: [
+        {
+          src: "/bolo-de-andar.jpg",
+          alt: "Bolo de Andar",
+          description: "Bolo de Andar Personalizado",
+          name: "Bolo de Andar",
+          price: calcularPrecoTotal(),
+        },
+      ],
+      horarioEntrega: horarioEntrega,
     }
     onAddToCart(produto)
     onClose()
@@ -149,6 +170,7 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
     setAdicionaisSelecionados([])
     setDataEntrega(undefined)
     setEndereco({ rua: "", numero: "", bairro: "", complemento: "" })
+    setHorarioEntrega("")
   }
 
   const isFormValid = () => {
@@ -157,7 +179,7 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
     if (etapa === 3 && quantidadeRecheios === 0) return false
     if (etapa === 4 && recheiosSelecionados.length === 0) return false
     if (etapa === 6 && !dataEntrega) return false
-    if (etapa === 7 && (!endereco.rua || !endereco.numero || !endereco.bairro)) return false
+    if (etapa === 7 && (!endereco.rua || !endereco.numero || !endereco.bairro || !horarioEntrega)) return false
     return true
   }
 
@@ -347,35 +369,78 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
 
             {etapa === 7 && (
               <div className="space-y-4">
-                <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Endereço de Entrega</h3>
+                <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>
+                  Endereço e Horário de Entrega
+                </h3>
                 <p className={`${sour_candy.className} text-sm text-center text-pink-500`}>
-                  Preencha o endereço para entrega do seu bolo
+                  Preencha o endereço e selecione um horário para entrega do seu bolo
                 </p>
-                <div className="space-y-2">
-                  <Input
-                    placeholder="Rua"
-                    value={endereco.rua}
-                    onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })}
-                    className="w-full"
-                  />
-                  <Input
-                    placeholder="Número"
-                    value={endereco.numero}
-                    onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
-                    className="w-full"
-                  />
-                  <Input
-                    placeholder="Bairro"
-                    value={endereco.bairro}
-                    onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
-                    className="w-full"
-                  />
-                  <Input
-                    placeholder="Complemento"
-                    value={endereco.complemento}
-                    onChange={(e) => setEndereco({ ...endereco, complemento: e.target.value })}
-                    className="w-full"
-                  />
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="horario-entrega" className={`${sour_candy.className} text-sm font-medium`}>
+                      Horário de Entrega
+                    </Label>
+                    <Select value={horarioEntrega} onValueChange={setHorarioEntrega}>
+                      <SelectTrigger id="horario-entrega" className="w-full">
+                        <SelectValue placeholder="Selecione um horário" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {horariosEntrega.map((horario) => (
+                          <SelectItem key={horario} value={horario}>
+                            {horario}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="rua" className={`${sour_candy.className} text-sm font-medium`}>
+                      Rua
+                    </Label>
+                    <Input
+                      id="rua"
+                      placeholder="Rua"
+                      value={endereco.rua}
+                      onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="numero" className={`${sour_candy.className} text-sm font-medium`}>
+                      Número
+                    </Label>
+                    <Input
+                      id="numero"
+                      placeholder="Número"
+                      value={endereco.numero}
+                      onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="bairro" className={`${sour_candy.className} text-sm font-medium`}>
+                      Bairro
+                    </Label>
+                    <Input
+                      id="bairro"
+                      placeholder="Bairro"
+                      value={endereco.bairro}
+                      onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
+                      className="w-full"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="complemento" className={`${sour_candy.className} text-sm font-medium`}>
+                      Complemento
+                    </Label>
+                    <Input
+                      id="complemento"
+                      placeholder="Complemento"
+                      value={endereco.complemento}
+                      onChange={(e) => setEndereco({ ...endereco, complemento: e.target.value })}
+                      className="w-full"
+                    />
+                  </div>
                 </div>
               </div>
             )}
