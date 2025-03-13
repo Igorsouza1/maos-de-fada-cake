@@ -117,7 +117,7 @@ export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoD
     return precoBase + precoRecheiosGourmet + precoAdicionais + (quantidadeRecheios === 2 ? 10 : 0)
   }
 
-  const dataMinima = addDays(new Date(), 4)
+  const dataMinima = addDays(new Date(), 0)
 
   const handleAddToCart = () => {
     const produto: Produto = {

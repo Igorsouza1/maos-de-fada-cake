@@ -56,7 +56,7 @@ export function BoloPiscinaDialog({ isOpen, onClose, onAddToCart }: BoloPiscinaD
   const [horarioSelecionado, setHorarioSelecionado] = useState<string>("")
   const [endereco, setEndereco] = useState({ rua: "", bairro: "", numero: "", complemento: "" })
 
-  const dataMinima = addDays(new Date(), 4)
+  const dataMinima = addDays(new Date(), 0)
 
   const handleAddToCart = () => {
     const produto: Produto = {

@@ -126,7 +126,7 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
     return precoBase + precoRecheiosGourmet + precoAdicionais + (quantidadeRecheios === 2 ? 10 : 0)
   }
 
-  const dataMinima = addDays(new Date(), 4)
+  const dataMinima = addDays(new Date(), 0)
 
   const handleAddToCart = () => {
     const produto: Produto = {

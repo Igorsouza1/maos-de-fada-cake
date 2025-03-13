@@ -69,7 +69,7 @@ export function DocinhosDialog({ isOpen, onClose, onAddToCart }: DocinhosDialogP
     setEtapa(etapa - 1)
   }
 
-  const dataMinima = addDays(new Date(), 4)
+  const dataMinima = addDays(new Date(), 0)
 
   const isFormValid = () => {
     if (etapa === 1 && saboresSelecionados.length === 0) return false

@@ -61,7 +61,7 @@ export function CupcakeDialog({ isOpen, onClose, onAddToCart }: CupcakeDialogPro
   const [horarioSelecionado, setHorarioSelecionado] = useState<string>("")
   const [endereco, setEndereco] = useState({ rua: "", bairro: "", numero: "", complemento: "" })
 
-  const dataMinima = addDays(new Date(), 4)
+  const dataMinima = addDays(new Date(), 0)
 
   const handleAddToCart = () => {
     const tipoSelecionado = tipos.find((t) => t.id === tipo)

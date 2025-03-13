@@ -92,7 +92,7 @@ export function BoloMarmitaDialog({ isOpen, onClose, onAddToCart }: BoloMarmitaD
     return precoBase + precoRecheiosGourmet + precoBrigadeiros + (quantidadeRecheios === 2 ? 10 : 0)
   }
 
-  const dataMinima = addDays(new Date(), 4)
+  const dataMinima = addDays(new Date(), 0)
 
   const isFormValid = () => {
     if (etapa === 1 && (!massaSelecionada || quantidade === "" || (typeof quantidade === "number" && quantidade < 10)))

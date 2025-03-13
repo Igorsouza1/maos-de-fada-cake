@@ -136,7 +136,7 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
     return precoBase + precoRecheiosGourmet + precoAdicionais + (quantidadeRecheios === 2 ? 10 : 0) + precoTopper
   }
 
-  const dataMinima = addDays(new Date(), 4)
+  const dataMinima = addDays(new Date(), 0)
 
   const handleAddToCart = () => {
     const produto: Produto = {
