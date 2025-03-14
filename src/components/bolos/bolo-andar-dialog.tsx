@@ -61,7 +61,6 @@ const adicionais = [
 ]
 
 // Set the delivery fee to R$20
-const taxaEntrega = 20 // R$20 for delivery
 
 const horariosEntrega = ["09:00 - 12:00", "14:00 - 17:00", "18:00 - 21:00"]
 
