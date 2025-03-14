@@ -61,6 +61,7 @@ const adicionais = [
 ]
 
 // Set the delivery fee to R$20
+const taxaEntrega = 20 // R$20 for delivery
 
 const horariosEntrega = ["09:00 - 12:00", "14:00 - 17:00", "18:00 - 21:00"]
 
@@ -125,8 +126,8 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
     const precoAdicionais = adicionaisSelecionados
       .map((a) => adicionais.find((ad) => ad.nome === a)?.preco || 0)
       .reduce((a, b) => a + b, 0)
-    // Remove the taxaEntregaTotal calculation - delivery is free
-    return precoBase + precoRecheiosGourmet + precoAdicionais + (quantidadeRecheios === 2 ? 10 : 0)
+    const taxaEntregaTotal = tipoEntrega === "entrega" ? taxaEntrega : 0
+    return precoBase + precoRecheiosGourmet + precoAdicionais + (quantidadeRecheios === 2 ? 10 : 0) + taxaEntregaTotal
   }
 
   const dataMinima = addDays(new Date(), 4)
@@ -407,9 +408,15 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
                   className="space-y-2"
                 >
                   <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
+                    <RadioGroupItem value="retirada" id="retirada" />
+                    <Label htmlFor="retirada" className={`${sour_candy.className} text-lg flex-grow`}>
+                      Retirar no local
+                    </Label>
+                  </div>
+                  <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
                     <RadioGroupItem value="entrega" id="entrega" />
                     <Label htmlFor="entrega" className={`${sour_candy.className} text-lg flex-grow`}>
-                      Entrega (Grátis)
+                      Entrega (+R${taxaEntrega.toFixed(2)})
                     </Label>
                   </div>
                 </RadioGroup>
@@ -484,9 +491,6 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
                 )}
               </div>
             )}
-            <p className={`${sour_candy.className} text-sm text-center text-pink-500 font-bold mt-2`}>
-              OBS: A entrega e topper são gratuitos para o Bolo de Andar!
-            </p>
           </div>
         </ScrollArea>
         <DialogFooter className="p-6 bg-white border-t">
