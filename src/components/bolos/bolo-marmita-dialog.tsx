@@ -137,8 +137,16 @@ export function BoloMarmitaDialog({ isOpen, onClose, onAddToCart }: BoloMarmitaD
 
   const isFormValid = () => {
     if (!sabor || Number.parseInt(quantidade) < 10 || !recheio || !dataEntrega || !horarioSelecionado) return false
-    if (tipoEntrega === "entrega" && (!endereco.rua || !endereco.bairro || !endereco.numero || !endereco.complemento))
-      return false
+
+    // Only validate address fields if delivery is selected
+    if (tipoEntrega === "entrega") {
+      // Check address fields (making complemento optional)
+      if (!endereco.rua) return false
+      if (!endereco.bairro) return false
+      if (!endereco.numero) return false
+      // Note: complemento is now optional
+    }
+
     return true
   }
 

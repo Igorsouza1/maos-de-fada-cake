@@ -210,15 +210,23 @@ export function BoloRetangularDialog({ isOpen, onClose, onAddToCart }: BoloRetan
     if (etapa === 4 && !tamanho) return false
     if (etapa === 5 && querTopper === null) return false
     if (etapa === 5 && querTopper === true && !topperTipo) return false
-    // Remova a validação da etapa 6 (adicionais), pois são opcionais
     if (etapa === 7 && !dataEntrega) return false
-    if (etapa === 8 && tipoEntrega === "entrega" && !horarioEntrega) return false // Adicione validação para o horário
-    if (
-      etapa === 8 &&
-      tipoEntrega === "entrega" &&
-      (!endereco.rua || !endereco.bairro || !endereco.numero || !endereco.complemento)
-    )
-      return false
+
+    // Special validation for step 8 (delivery options)
+    if (etapa === 8) {
+      // Always require a time selection
+      if (!horarioEntrega) return false
+
+      // Only validate address fields if delivery is selected
+      if (tipoEntrega === "entrega") {
+        // Check address fields (making complemento optional)
+        if (!endereco.rua) return false
+        if (!endereco.bairro) return false
+        if (!endereco.numero) return false
+        // Note: complemento is now optional
+      }
+    }
+
     return true
   }
 

@@ -202,13 +202,22 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
     if (etapa === 5 && querTopper === null) return false
     if (etapa === 5 && querTopper === true && !topperTipo) return false
     if (etapa === 7 && !dataEntrega) return false
-    if (etapa === 8 && !horarioSelecionado) return false
-    if (
-      etapa === 8 &&
-      tipoEntrega === "entrega" &&
-      (!endereco.rua || !endereco.bairro || !endereco.numero || !endereco.complemento)
-    )
-      return false
+
+    // Special validation for step 8 (delivery options)
+    if (etapa === 8) {
+      // Always require a time selection
+      if (!horarioSelecionado) return false
+
+      // Only validate address fields if delivery is selected
+      if (tipoEntrega === "entrega") {
+        // Check address fields (making complemento optional)
+        if (!endereco.rua) return false
+        if (!endereco.bairro) return false
+        if (!endereco.numero) return false
+        // Note: complemento is now optional
+      }
+    }
+
     return true
   }
 

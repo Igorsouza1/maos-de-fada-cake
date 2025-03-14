@@ -24,12 +24,12 @@ const recheios = ["Leite Ninho", "Brigadeiro"]
 
 const massas = ["Baunilha", "Cenoura", "Chocolate"]
 
-// Add a delivery fee constant after the massas array
-const taxaEntrega = 20 // R$15 for delivery
-
 // Add these constants for pickup and delivery times
 const horariosRetirada = ["11:00", "12:00", "15:00", "18:00", "19:00"]
 const horariosEntrega = ["13:30", "17:30", "18:00", "19:00"]
+
+// Add a delivery fee constant after the horariosEntrega array
+const taxaEntrega = 20 // R$15 for delivery
 
 interface Produto {
   id: string
@@ -66,9 +66,9 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
   const [horarioSelecionado, setHorarioSelecionado] = useState<string>("")
   const [endereco, setEndereco] = useState({ rua: "", bairro: "", numero: "", complemento: "" })
 
-  const dataMinima = addDays(new Date(), 0)
+  const dataMinima = addDays(new Date(), 4)
 
-  // Update the handleAddToCart function to include the delivery fee when delivery is selected
+  // Update the handleAddToCart function to include the delivery fee
   const handleAddToCart = () => {
     const tamanhoSelecionado = tamanhos.find((t) => t.id === tamanho)
     if (!tamanhoSelecionado) return
@@ -134,8 +134,16 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
 
   const isFormValid = () => {
     if (!tamanho || !recheio || !massa || !dataEntrega || !horarioSelecionado) return false
-    if (tipoEntrega === "entrega" && (!endereco.rua || !endereco.bairro || !endereco.numero || !endereco.complemento))
-      return false
+
+    // Only validate address fields if delivery is selected
+    if (tipoEntrega === "entrega") {
+      // Check address fields (making complemento optional)
+      if (!endereco.rua) return false
+      if (!endereco.bairro) return false
+      if (!endereco.numero) return false
+      // Note: complemento is now optional
+    }
+
     return true
   }
 
@@ -217,6 +225,7 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
             {step === 5 && (
               <div className="space-y-4">
                 <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Entrega ou Retirada</h3>
+                {/* Update the RadioGroup for delivery type to show the delivery fee */}
                 <RadioGroup
                   value={tipoEntrega}
                   onValueChange={(value: "retirada" | "entrega") => {
@@ -303,6 +312,7 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
                 Avançar
               </Button>
             ) : (
+              // Update the Button to show the total price including delivery fee
               <Button
                 onClick={handleAddToCart}
                 className="bg-pink-500 hover:bg-pink-600 text-white ml-auto"

@@ -168,13 +168,22 @@ export function BoloMetroDialog({ isOpen, onClose, onAddToCart }: BoloMetroDialo
     if (etapa === 3 && quantidadeRecheios === 0) return false
     if (etapa === 4 && recheiosSelecionados.length === 0) return false
     if (etapa === 6 && !dataEntrega) return false
-    if (etapa === 7 && !horarioSelecionado) return false // Add validation for selected time
-    if (
-      etapa === 7 &&
-      tipoEntrega === "entrega" &&
-      (!endereco.rua || !endereco.bairro || !endereco.numero || !endereco.complemento)
-    )
-      return false
+
+    // Special validation for step 7 (delivery options)
+    if (etapa === 7) {
+      // Always require a time selection
+      if (!horarioSelecionado) return false
+
+      // Only validate address fields if delivery is selected
+      if (tipoEntrega === "entrega") {
+        // Check address fields (making complemento optional)
+        if (!endereco.rua) return false
+        if (!endereco.bairro) return false
+        if (!endereco.numero) return false
+        // Note: complemento is now optional
+      }
+    }
+
     return true
   }
 

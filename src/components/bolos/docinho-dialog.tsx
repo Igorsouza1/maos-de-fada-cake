@@ -29,12 +29,12 @@ const quantidades = [
   { id: "150", nome: "150 docinhos", preco: 210 },
 ]
 
-// Add a delivery fee constant after the quantidades array
-const taxaEntrega = 20 // R$15 for delivery
-
 // Add these constants for pickup and delivery times
 const horariosRetirada = ["11:00", "12:00", "15:00", "18:00", "19:00"]
 const horariosEntrega = ["13:30", "17:30", "18:00", "19:00"]
+
+// Add a delivery fee constant after the horariosEntrega array
+const taxaEntrega = 20 // R$15 for delivery
 
 interface Produto {
   id: string
@@ -72,19 +72,27 @@ export function DocinhosDialog({ isOpen, onClose, onAddToCart }: DocinhosDialogP
     setEtapa(etapa - 1)
   }
 
-  const dataMinima = addDays(new Date(), 0)
+  const dataMinima = addDays(new Date(), 4)
 
   const isFormValid = () => {
     if (etapa === 1 && saboresSelecionados.length === 0) return false
     if (etapa === 2 && !quantidadeSelecionada) return false
     if (etapa === 3 && !dataEntrega) return false
     if (etapa === 4 && !horarioSelecionado) return false
-    if (etapa === 4 && tipoEntrega === "entrega" && (!endereco.rua || !endereco.bairro || !endereco.numero))
-      return false
+
+    // Only validate address fields if delivery is selected and we're on step 4
+    if (etapa === 4 && tipoEntrega === "entrega") {
+      // Check address fields (making complemento optional)
+      if (!endereco.rua) return false
+      if (!endereco.bairro) return false
+      if (!endereco.numero) return false
+      // Note: complemento is now optional
+    }
+
     return true
   }
 
-  // Update the handleAddToCart function to include the delivery fee when delivery is selected
+  // Update the handleAddToCart function to include the delivery fee
   const handleAddToCart = () => {
     const quantidadeObj = quantidades.find((q) => q.id === quantidadeSelecionada)
     if (!quantidadeObj) return
@@ -299,12 +307,10 @@ export function DocinhosDialog({ isOpen, onClose, onAddToCart }: DocinhosDialogP
               disabled={!isFormValid()}
             >
               Adicionar ao Carrinho (R$
-              {(
-                (quantidades.find((q) => q.id === quantidadeSelecionada)?.preco || 0) +
+              {(quantidades.find((q) => q.id === quantidadeSelecionada)?.preco || 0) +
                 (saboresSelecionados.includes("ninhonutella") ? 20 : 0) +
-                (tipoEntrega === "entrega" ? taxaEntrega : 0)
-              ).toFixed(2)}
-              )
+                (tipoEntrega === "entrega" ? taxaEntrega : 0)}
+              .00)
             </Button>
           )}
         </DialogFooter>

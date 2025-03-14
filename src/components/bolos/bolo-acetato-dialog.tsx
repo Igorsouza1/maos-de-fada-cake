@@ -165,13 +165,22 @@ export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoD
     if (etapa === 2 && quantidadeRecheios === 0) return false
     if (etapa === 3 && recheiosSelecionados.length === 0) return false
     if (etapa === 5 && !dataEntrega) return false
-    if (
-      etapa === 6 &&
-      tipoEntrega === "entrega" &&
-      (!endereco.rua || !endereco.bairro || !endereco.numero || !endereco.complemento)
-    )
-      return false
-    if (etapa === 6 && tipoEntrega === "entrega" && !horarioEntrega) return false
+
+    // Special validation for step 6 (delivery options)
+    if (etapa === 6) {
+      // Always require a time selection
+      if (!horarioEntrega) return false
+
+      // Only validate address fields if delivery is selected
+      if (tipoEntrega === "entrega") {
+        // Check address fields (making complemento optional)
+        if (!endereco.rua) return false
+        if (!endereco.bairro) return false
+        if (!endereco.numero) return false
+        // Note: complemento is now optional
+      }
+    }
+
     return true
   }
 

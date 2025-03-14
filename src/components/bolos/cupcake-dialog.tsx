@@ -64,9 +64,9 @@ export function CupcakeDialog({ isOpen, onClose, onAddToCart }: CupcakeDialogPro
   const [horarioSelecionado, setHorarioSelecionado] = useState<string>("")
   const [endereco, setEndereco] = useState({ rua: "", bairro: "", numero: "", complemento: "" })
 
-  const dataMinima = addDays(new Date(), 0)
+  const dataMinima = addDays(new Date(), 4)
 
-  // Update the handleAddToCart function to include the delivery fee when delivery is selected
+  // Update the handleAddToCart function to include the delivery fee
   const handleAddToCart = () => {
     const tipoSelecionado = tipos.find((t) => t.id === tipo)
     if (!tipoSelecionado) return
@@ -91,7 +91,7 @@ export function CupcakeDialog({ isOpen, onClose, onAddToCart }: CupcakeDialogPro
           alt: "Cupcake",
           description: `Cupcake ${tipoSelecionado.nome}`,
           name: `Cupcake ${tipoSelecionado.nome}`,
-          price: precoTotal,
+          price: tipoSelecionado.preco,
         },
       ],
     }
@@ -138,8 +138,16 @@ export function CupcakeDialog({ isOpen, onClose, onAddToCart }: CupcakeDialogPro
   const isFormValid = () => {
     if (!tipo || Number.parseInt(quantidade) < 10 || !dataEntrega || !horarioSelecionado) return false
     if (tipo === "recheado" && !recheio) return false
-    if (tipoEntrega === "entrega" && (!endereco.rua || !endereco.bairro || !endereco.numero || !endereco.complemento))
-      return false
+
+    // Only validate address fields if delivery is selected
+    if (tipoEntrega === "entrega") {
+      // Check address fields (making complemento optional)
+      if (!endereco.rua) return false
+      if (!endereco.bairro) return false
+      if (!endereco.numero) return false
+      // Note: complemento is now optional
+    }
+
     return true
   }
 
@@ -223,7 +231,6 @@ export function CupcakeDialog({ isOpen, onClose, onAddToCart }: CupcakeDialogPro
             {step === 4 && (
               <div className="space-y-4">
                 <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Entrega ou Retirada</h3>
-                {/* Update the RadioGroup for delivery type to show the delivery fee */}
                 <RadioGroup
                   value={tipoEntrega}
                   onValueChange={(value: "retirada" | "entrega") => {
@@ -310,7 +317,6 @@ export function CupcakeDialog({ isOpen, onClose, onAddToCart }: CupcakeDialogPro
                 Avançar
               </Button>
             ) : (
-              // Update the Button text to show the updated price
               <Button
                 onClick={handleAddToCart}
                 className="bg-pink-500 hover:bg-pink-600 text-white ml-auto"

@@ -60,8 +60,8 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
-// Add a delivery fee constant
-const taxaEntrega = 20 // R$15 for delivery
+// Set the delivery fee to R$20
+const taxaEntrega = 20 // R$20 for delivery
 
 const horariosEntrega = ["09:00 - 12:00", "14:00 - 17:00", "18:00 - 21:00"]
 
@@ -106,7 +106,8 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
   const [dataEntrega, setDataEntrega] = useState<Date | undefined>(undefined)
   const [endereco, setEndereco] = useState({ rua: "", numero: "", bairro: "", complemento: "" })
   const [horarioEntrega, setHorarioEntrega] = useState<string>("")
-  const [tipoEntrega, setTipoEntrega] = useState<"retirada" | "entrega">("entrega") // Default to delivery for this cake type
+  // Change the default tipoEntrega to "retirada" instead of "entrega"
+  const [tipoEntrega, setTipoEntrega] = useState<"retirada" | "entrega">("retirada")
 
   const avancarEtapa = () => {
     setEtapa(etapa + 1)
@@ -125,12 +126,13 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
     const precoAdicionais = adicionaisSelecionados
       .map((a) => adicionais.find((ad) => ad.nome === a)?.preco || 0)
       .reduce((a, b) => a + b, 0)
-    // Note: For Bolo Andar, delivery is included in the base price, so we don't add taxaEntrega
+    // Remove the taxaEntregaTotal calculation - delivery is free
     return precoBase + precoRecheiosGourmet + precoAdicionais + (quantidadeRecheios === 2 ? 10 : 0)
   }
 
-  const dataMinima = addDays(new Date(), 0)
+  const dataMinima = addDays(new Date(), 4)
 
+  // Update the handleAddToCart function to use the selected tipoEntrega
   const handleAddToCart = () => {
     const produto: Produto = {
       id: `bolo-andar-${Date.now()}`,
@@ -141,7 +143,7 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
       adicionais: adicionaisSelecionados,
       preco: calcularPrecoTotal(),
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
-      endereco: endereco,
+      endereco: tipoEntrega === "entrega" ? endereco : null,
       imagens: [
         {
           src: "/bolo-de-andar.jpg",
@@ -152,13 +154,14 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
         },
       ],
       horarioEntrega: horarioEntrega,
-      tipoEntrega: "entrega", // Always delivery for this cake type
+      tipoEntrega: tipoEntrega, // Use the selected delivery type
     }
     onAddToCart(produto)
     onClose()
     resetForm()
   }
 
+  // Update the resetForm function to reset tipoEntrega to "retirada"
   const resetForm = () => {
     setEtapa(1)
     setTamanho("")
@@ -169,16 +172,41 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
     setDataEntrega(undefined)
     setEndereco({ rua: "", numero: "", bairro: "", complemento: "" })
     setHorarioEntrega("")
-    setTipoEntrega("entrega") // Reset to default delivery
+    setTipoEntrega("retirada") // Reset to default pickup
   }
 
+  // Update the isFormValid function to check for delivery address only when delivery is selected
   const isFormValid = () => {
+    // Basic validations for steps 1-6
     if (etapa === 1 && !tamanho) return false
     if (etapa === 2 && !massaSelecionada) return false
     if (etapa === 3 && quantidadeRecheios === 0) return false
     if (etapa === 4 && recheiosSelecionados.length === 0) return false
     if (etapa === 6 && !dataEntrega) return false
-    if (etapa === 7 && (!endereco.rua || !endereco.numero || !endereco.bairro || !horarioEntrega)) return false
+
+    // Special validation for step 7 (delivery options)
+    if (etapa === 7) {
+      // For pickup option
+      if (tipoEntrega === "retirada") {
+        return !!horarioEntrega // Only require time selection
+      }
+
+      // For delivery option - check each field individually
+      if (tipoEntrega === "entrega") {
+        // Check time selection
+        if (!horarioEntrega) return false
+
+        // Check address fields (making complemento optional)
+        if (!endereco.rua) return false
+        if (!endereco.numero) return false
+        if (!endereco.bairro) return false
+
+        // If we get here, all required fields are filled
+        return true
+      }
+    }
+
+    // Default case - if we're not in any of the above cases, validation passes
     return true
   }
 
@@ -208,8 +236,9 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
                     </div>
                   ))}
                 </RadioGroup>
+                {/* Remove the text about free delivery in etapa 1 */}
                 <p className={`${sour_candy.className} text-sm text-center text-pink-500 mt-4`}>
-                  Obs: Topper e entrega inclusos no preço.
+                  Obs: Topper grátis para o Bolo de Andar.
                 </p>
               </div>
             )}
@@ -366,86 +395,99 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
               </div>
             )}
 
+            {/* Replace etapa 7 with a new implementation that includes pickup option */}
             {etapa === 7 && (
               <div className="space-y-4">
-                <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>
-                  Endereço e Horário de Entrega
-                </h3>
-                <p className={`${sour_candy.className} text-sm text-center text-pink-500`}>
-                  Preencha o endereço e selecione um horário para entrega do seu bolo
-                </p>
-                <p className={`${sour_candy.className} text-sm text-center text-pink-500 font-bold`}>
-                  OBS: A entrega e topper são gratuitos para o Bolo de Andar!
-                </p>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="horario-entrega" className={`${sour_candy.className} text-sm font-medium`}>
-                      Horário de Entrega
+                <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Entrega ou Retirada</h3>
+                <RadioGroup
+                  value={tipoEntrega}
+                  onValueChange={(value: "retirada" | "entrega") => {
+                    setTipoEntrega(value)
+                    setHorarioEntrega("")
+                  }}
+                  className="space-y-2"
+                >
+                  <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
+                    <RadioGroupItem value="entrega" id="entrega" />
+                    <Label htmlFor="entrega" className={`${sour_candy.className} text-lg flex-grow`}>
+                      Entrega (Grátis)
                     </Label>
-                    <Select value={horarioEntrega} onValueChange={setHorarioEntrega}>
-                      <SelectTrigger id="horario-entrega" className="w-full">
-                        <SelectValue placeholder="Selecione um horário" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {horariosEntrega.map((horario) => (
-                          <SelectItem key={horario} value={horario}>
-                            {horario}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="rua" className={`${sour_candy.className} text-sm font-medium`}>
-                      Rua
-                    </Label>
-                    <Input
-                      id="rua"
-                      placeholder="Rua"
-                      value={endereco.rua}
-                      onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })}
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="numero" className={`${sour_candy.className} text-sm font-medium`}>
-                      Número
-                    </Label>
-                    <Input
-                      id="numero"
-                      placeholder="Número"
-                      value={endereco.numero}
-                      onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="bairro" className={`${sour_candy.className} text-sm font-medium`}>
-                      Bairro
-                    </Label>
-                    <Input
-                      id="bairro"
-                      placeholder="Bairro"
-                      value={endereco.bairro}
-                      onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
-                      className="w-full"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="complemento" className={`${sour_candy.className} text-sm font-medium`}>
-                      Complemento
-                    </Label>
-                    <Input
-                      id="complemento"
-                      placeholder="Complemento"
-                      value={endereco.complemento}
-                      onChange={(e) => setEndereco({ ...endereco, complemento: e.target.value })}
-                      className="w-full"
-                    />
-                  </div>
+                </RadioGroup>
+                <div className="space-y-2">
+                  <Label htmlFor="horario-entrega" className={`${sour_candy.className} text-sm font-medium`}>
+                    {tipoEntrega === "retirada" ? "Horário de Retirada" : "Horário de Entrega"}
+                  </Label>
+                  <Select value={horarioEntrega} onValueChange={setHorarioEntrega}>
+                    <SelectTrigger id="horario-entrega" className="w-full">
+                      <SelectValue placeholder="Selecione um horário" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {horariosEntrega.map((horario) => (
+                        <SelectItem key={horario} value={horario}>
+                          {horario}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
+                {tipoEntrega === "entrega" && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="rua" className={`${sour_candy.className} text-sm font-medium`}>
+                        Rua
+                      </Label>
+                      <Input
+                        id="rua"
+                        placeholder="Rua"
+                        value={endereco.rua}
+                        onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })}
+                        className="w-full"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="numero" className={`${sour_candy.className} text-sm font-medium`}>
+                        Número
+                      </Label>
+                      <Input
+                        id="numero"
+                        placeholder="Número"
+                        value={endereco.numero}
+                        onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
+                        className="w-full"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="bairro" className={`${sour_candy.className} text-sm font-medium`}>
+                        Bairro
+                      </Label>
+                      <Input
+                        id="bairro"
+                        placeholder="Bairro"
+                        value={endereco.bairro}
+                        onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
+                        className="w-full"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="complemento" className={`${sour_candy.className} text-sm font-medium`}>
+                        Complemento
+                      </Label>
+                      <Input
+                        id="complemento"
+                        placeholder="Complemento"
+                        value={endereco.complemento}
+                        onChange={(e) => setEndereco({ ...endereco, complemento: e.target.value })}
+                        className="w-full"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
             )}
+            <p className={`${sour_candy.className} text-sm text-center text-pink-500 font-bold mt-2`}>
+              OBS: A entrega e topper são gratuitos para o Bolo de Andar!
+            </p>
           </div>
         </ScrollArea>
         <DialogFooter className="p-6 bg-white border-t">
