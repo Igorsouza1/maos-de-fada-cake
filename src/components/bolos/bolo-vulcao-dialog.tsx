@@ -24,6 +24,9 @@ const recheios = ["Leite Ninho", "Brigadeiro"]
 
 const massas = ["Baunilha", "Cenoura", "Chocolate"]
 
+// Add a delivery fee constant after the massas array
+const taxaEntrega = 20 // R$15 for delivery
+
 // Add these constants for pickup and delivery times
 const horariosRetirada = ["11:00", "12:00", "15:00", "18:00", "19:00"]
 const horariosEntrega = ["13:30", "17:30", "18:00", "19:00"]
@@ -65,9 +68,12 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
 
   const dataMinima = addDays(new Date(), 0)
 
+  // Update the handleAddToCart function to include the delivery fee when delivery is selected
   const handleAddToCart = () => {
     const tamanhoSelecionado = tamanhos.find((t) => t.id === tamanho)
     if (!tamanhoSelecionado) return
+
+    const precoTotal = tamanhoSelecionado.preco + (tipoEntrega === "entrega" ? taxaEntrega : 0)
 
     const produto: Produto = {
       id: `bolo-vulcao-${Date.now()}`,
@@ -75,7 +81,7 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
       tamanho: tamanhoSelecionado.descricao,
       recheio: recheio,
       massa: massa,
-      preco: tamanhoSelecionado.preco,
+      preco: precoTotal,
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       tipoEntrega: tipoEntrega,
       horario: horarioSelecionado,
@@ -86,7 +92,7 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
           alt: "Bolo Vulcão",
           description: `Bolo Vulcão ${tamanhoSelecionado.nome}`,
           name: `Bolo Vulcão ${tamanhoSelecionado.nome}`,
-          price: tamanhoSelecionado.preco,
+          price: precoTotal,
         },
       ],
     }
@@ -228,7 +234,7 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
                   <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
                     <RadioGroupItem value="entrega" id="entrega" />
                     <Label htmlFor="entrega" className={`${sour_candy.className} text-lg flex-grow`}>
-                      Entrega
+                      Entrega (+R${taxaEntrega.toFixed(2)})
                     </Label>
                   </div>
                 </RadioGroup>
@@ -302,7 +308,9 @@ export function BoloVulcaoDialog({ isOpen, onClose, onAddToCart }: BoloVulcaoDia
                 className="bg-pink-500 hover:bg-pink-600 text-white ml-auto"
                 disabled={!isFormValid()}
               >
-                Adicionar ao Carrinho
+                Adicionar ao Carrinho (R$
+                {(tamanhos.find((t) => t.id === tamanho)?.preco || 0) + (tipoEntrega === "entrega" ? taxaEntrega : 0)}
+                .00)
               </Button>
             )}
           </div>

@@ -49,19 +49,30 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
-// Adicione estas constantes no início do arquivo, junto com as outras constantes
-const horariosRetirada = ["11:00", "12:00", "15:00", "18:00", "19:00"]
-const horariosEntrega = ["13:30", "17:30", "18:00", "19:00"]
+// Adicione os horários de entrega disponíveis
+const horariosEntrega = [
+  "09:00 - 10:00",
+  "10:00 - 11:00",
+  "11:00 - 12:00",
+  "14:00 - 15:00",
+  "15:00 - 16:00",
+  "16:00 - 17:00",
+  "17:00 - 18:00",
+]
 
+// Modifique a constante tiposBolo para topperOpcoes
 const topperOpcoes = [
   { id: "simples", nome: "Simples", precos: { "20x30": 15, "25x35": 20, "30x40": 25 } },
   { id: "3d", nome: "3D", precos: { "20x30": 25, "25x35": 30, "30x40": 40 } },
 ]
 
+// Add a delivery fee constant after the topperOpcoes array
+const taxaEntrega = 20 // R$15 for delivery
+
 interface Produto {
   id: string
   nome: string
-  descricao?: string
+  descricao?: string // Make descricao optional
   preco: number
   imagens: { src: string; alt: string; description: string; name: string; price: number }[]
   massa?: string
@@ -70,7 +81,7 @@ interface Produto {
   adicionais?: string[]
   dataEntrega?: string
   tipoEntrega?: "retirada" | "entrega"
-  horario?: string
+  horarioEntrega?: string // Adicione o horário de entrega
   endereco?: {
     rua: string
     bairro: string
@@ -80,8 +91,8 @@ interface Produto {
   observacao?: string
   quantidade?: number
   tipo?: string
-  cobertura?: string
-  topper?: string | null
+  cobertura?: string // Add this for Bolo Piscina
+  topper?: string | null // Adicione esta propriedade
 }
 
 interface BoloRetangularDialogProps {
@@ -96,13 +107,14 @@ export function BoloRetangularDialog({ isOpen, onClose, onAddToCart }: BoloRetan
   const [quantidadeRecheios, setQuantidadeRecheios] = useState<number>(1)
   const [recheiosSelecionados, setRecheiosSelecionados] = useState<string[]>([])
   const [tamanho, setTamanho] = useState<string>("")
-  const [querTopper, setQuerTopper] = useState<boolean | null>(null)
-  const [topperTipo, setTopperTipo] = useState<string>("")
   const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<string[]>([])
   const [dataEntrega, setDataEntrega] = useState<Date | undefined>(undefined)
   const [tipoEntrega, setTipoEntrega] = useState<"retirada" | "entrega">("retirada")
-  const [horarioSelecionado, setHorarioSelecionado] = useState<string>("")
   const [endereco, setEndereco] = useState({ rua: "", bairro: "", numero: "", complemento: "" })
+  // Substitua o estado tipoBolo por estes dois estados
+  const [querTopper, setQuerTopper] = useState<boolean | null>(null)
+  const [topperTipo, setTopperTipo] = useState<string>("")
+  const [horarioEntrega, setHorarioEntrega] = useState<string>("") // Adicione o estado para o horário de entrega
 
   const avancarEtapa = () => {
     setEtapa(etapa + 1)
@@ -112,6 +124,7 @@ export function BoloRetangularDialog({ isOpen, onClose, onAddToCart }: BoloRetan
     setEtapa(etapa - 1)
   }
 
+  // Update the calcularPrecoTotal function to include the delivery fee when delivery is selected
   const calcularPrecoTotal = () => {
     const precoBase = tamanhos.find((t) => t.id === tamanho)?.preco || 0
     const precoRecheiosGourmet = recheiosSelecionados
@@ -121,6 +134,7 @@ export function BoloRetangularDialog({ isOpen, onClose, onAddToCart }: BoloRetan
       .map((a) => adicionais.find((ad) => ad.nome === a)?.preco || 0)
       .reduce((a, b) => a + b, 0)
 
+    // Adicione o preço do topper apenas se querTopper for true
     let precoTopper = 0
     if (querTopper && topperTipo && tamanho) {
       const topperSelecionado = topperOpcoes.find((t) => t.id === topperTipo)
@@ -129,11 +143,20 @@ export function BoloRetangularDialog({ isOpen, onClose, onAddToCart }: BoloRetan
         : 0
     }
 
-    return precoBase + precoRecheiosGourmet + precoAdicionais + (quantidadeRecheios === 2 ? 10 : 0) + precoTopper
+    const taxaEntregaTotal = tipoEntrega === "entrega" ? taxaEntrega : 0
+    return (
+      precoBase +
+      precoRecheiosGourmet +
+      precoAdicionais +
+      (quantidadeRecheios === 2 ? 10 : 0) +
+      precoTopper +
+      taxaEntregaTotal
+    )
   }
 
   const dataMinima = addDays(new Date(), 0)
 
+  // Modifique a função handleAddToCart para incluir o topper e o horário de entrega
   const handleAddToCart = () => {
     const produto: Produto = {
       id: `bolo-retangular-${Date.now()}`,
@@ -146,7 +169,7 @@ export function BoloRetangularDialog({ isOpen, onClose, onAddToCart }: BoloRetan
       preco: calcularPrecoTotal(),
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       tipoEntrega,
-      horario: horarioSelecionado,
+      horarioEntrega: tipoEntrega === "entrega" ? horarioEntrega : undefined, // Adicione o horário de entrega
       endereco: tipoEntrega === "entrega" ? endereco : null,
       imagens: [
         {
@@ -163,21 +186,23 @@ export function BoloRetangularDialog({ isOpen, onClose, onAddToCart }: BoloRetan
     resetForm()
   }
 
+  // Modifique a função resetForm para incluir o reset do horário de entrega
   const resetForm = () => {
     setEtapa(1)
     setMassaSelecionada("")
     setQuantidadeRecheios(1)
     setRecheiosSelecionados([])
     setTamanho("")
-    setQuerTopper(null)
-    setTopperTipo("")
+    setQuerTopper(null) // Reset do querTopper
+    setTopperTipo("") // Reset do topperTipo
     setAdicionaisSelecionados([])
     setDataEntrega(undefined)
     setTipoEntrega("retirada")
-    setHorarioSelecionado("")
+    setHorarioEntrega("") // Reset do horário de entrega
     setEndereco({ rua: "", bairro: "", numero: "", complemento: "" })
   }
 
+  // Modifique a função isFormValid para validar querTopper e topperTipo
   const isFormValid = () => {
     if (etapa === 1 && !massaSelecionada) return false
     if (etapa === 2 && quantidadeRecheios === 0) return false
@@ -185,8 +210,9 @@ export function BoloRetangularDialog({ isOpen, onClose, onAddToCart }: BoloRetan
     if (etapa === 4 && !tamanho) return false
     if (etapa === 5 && querTopper === null) return false
     if (etapa === 5 && querTopper === true && !topperTipo) return false
+    // Remova a validação da etapa 6 (adicionais), pois são opcionais
     if (etapa === 7 && !dataEntrega) return false
-    if (etapa === 8 && !horarioSelecionado) return false
+    if (etapa === 8 && tipoEntrega === "entrega" && !horarioEntrega) return false // Adicione validação para o horário
     if (
       etapa === 8 &&
       tipoEntrega === "entrega" &&
@@ -430,7 +456,9 @@ export function BoloRetangularDialog({ isOpen, onClose, onAddToCart }: BoloRetan
                 value={tipoEntrega}
                 onValueChange={(value: "retirada" | "entrega") => {
                   setTipoEntrega(value)
-                  setHorarioSelecionado("") // Limpa o horário se mudar para retirada
+                  if (value === "retirada") {
+                    setHorarioEntrega("") // Limpa o horário se mudar para retirada
+                  }
                 }}
                 className="space-y-2"
               >
@@ -443,29 +471,29 @@ export function BoloRetangularDialog({ isOpen, onClose, onAddToCart }: BoloRetan
                 <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
                   <RadioGroupItem value="entrega" id="entrega" />
                   <Label htmlFor="entrega" className={`${sour_candy.className} text-lg flex-grow`}>
-                    Entrega
+                    Entrega (+R${taxaEntrega.toFixed(2)})
                   </Label>
                 </div>
               </RadioGroup>
-              <div className="space-y-2">
-                <Label htmlFor="horario-entrega" className={`${sour_candy.className} text-sm font-medium`}>
-                  {tipoEntrega === "retirada" ? "Horário de Retirada" : "Horário de Entrega"}
-                </Label>
-                <Select value={horarioSelecionado} onValueChange={setHorarioSelecionado}>
-                  <SelectTrigger id="horario-entrega" className="w-full">
-                    <SelectValue placeholder="Selecione um horário" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(tipoEntrega === "retirada" ? horariosRetirada : horariosEntrega).map((horario) => (
-                      <SelectItem key={horario} value={horario}>
-                        {horario}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
               {tipoEntrega === "entrega" && (
                 <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="horario-entrega" className={`${sour_candy.className} text-sm font-medium`}>
+                      Horário de Entrega
+                    </Label>
+                    <Select value={horarioEntrega} onValueChange={setHorarioEntrega}>
+                      <SelectTrigger id="horario-entrega" className="w-full">
+                        <SelectValue placeholder="Selecione um horário" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {horariosEntrega.map((horario) => (
+                          <SelectItem key={horario} value={horario}>
+                            {horario}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="rua" className={`${sour_candy.className} text-sm font-medium`}>
                       Rua

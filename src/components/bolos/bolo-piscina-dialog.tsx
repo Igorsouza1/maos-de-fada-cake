@@ -22,6 +22,9 @@ const coberturas = ["Chocolate", "Leite Ninho", "Mousse de Maracujá"]
 const horariosRetirada = ["11:00", "12:00", "15:00", "18:00", "19:00"]
 const horariosEntrega = ["13:30", "17:30", "18:00", "19:00"]
 
+// Add a delivery fee constant after the horariosEntrega array
+const taxaEntrega = 20 // R$15 for delivery
+
 interface Produto {
   id: string
   nome: string
@@ -58,14 +61,17 @@ export function BoloPiscinaDialog({ isOpen, onClose, onAddToCart }: BoloPiscinaD
 
   const dataMinima = addDays(new Date(), 0)
 
+  // Update the handleAddToCart function to include the delivery fee when delivery is selected
   const handleAddToCart = () => {
+    const precoTotal = 40.0 + (tipoEntrega === "entrega" ? taxaEntrega : 0)
+
     const produto: Produto = {
       id: `bolo-piscina-${Date.now()}`,
       nome: "Bolo Piscina",
       tamanho: "Rende de 15 a 20 fatias",
       massa: massa,
       cobertura: cobertura,
-      preco: 40.0,
+      preco: precoTotal,
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       tipoEntrega: tipoEntrega,
       horario: horarioSelecionado,
@@ -76,7 +82,7 @@ export function BoloPiscinaDialog({ isOpen, onClose, onAddToCart }: BoloPiscinaD
           alt: "Bolo Piscina",
           description: "Bolo piscina para festas de verão",
           name: "Bolo Piscina",
-          price: 40.0,
+          price: precoTotal,
         },
       ],
     }
@@ -198,7 +204,7 @@ export function BoloPiscinaDialog({ isOpen, onClose, onAddToCart }: BoloPiscinaD
                   <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
                     <RadioGroupItem value="entrega" id="entrega" />
                     <Label htmlFor="entrega" className={`${sour_candy.className} text-lg flex-grow`}>
-                      Entrega
+                      Entrega (+R${taxaEntrega.toFixed(2)})
                     </Label>
                   </div>
                 </RadioGroup>
@@ -272,7 +278,7 @@ export function BoloPiscinaDialog({ isOpen, onClose, onAddToCart }: BoloPiscinaD
                 className="bg-pink-500 hover:bg-pink-600 text-white ml-auto"
                 disabled={!isFormValid()}
               >
-                Adicionar ao Carrinho
+                Adicionar ao Carrinho (R${(40.0 + (tipoEntrega === "entrega" ? taxaEntrega : 0)).toFixed(2)})
               </Button>
             )}
           </div>

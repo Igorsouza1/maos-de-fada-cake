@@ -50,9 +50,7 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
-// Adicione estas constantes no início do arquivo, junto com as outras constantes
-const horariosRetirada = ["11:00", "12:00", "15:00", "18:00", "19:00"]
-const horariosEntrega = ["13:30", "17:30", "18:00", "19:00"]
+const taxaEntrega = 20 // R$15 for delivery
 
 interface Produto {
   id: string
@@ -76,7 +74,6 @@ interface Produto {
   quantidade?: number
   tipo?: string
   cobertura?: string // Add this for Bolo Piscina
-  horario?: string
   horarioEntrega?: string
 }
 
@@ -96,7 +93,8 @@ export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoD
   const [tipoEntrega, setTipoEntrega] = useState<"retirada" | "entrega">("retirada")
   const [endereco, setEndereco] = useState({ rua: "", bairro: "", numero: "", complemento: "" })
   const [horarioEntrega, setHorarioEntrega] = useState<string>("")
-  const [horarioSelecionado, setHorarioSelecionado] = useState<string>("")
+
+  const horariosEntrega = ["09:00 - 12:00", "13:00 - 16:00", "17:00 - 20:00"]
 
   const avancarEtapa = () => {
     setEtapa(etapa + 1)
@@ -114,7 +112,8 @@ export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoD
     const precoAdicionais = adicionaisSelecionados
       .map((a) => adicionais.find((ad) => ad.nome === a)?.preco || 0)
       .reduce((a, b) => a + b, 0)
-    return precoBase + precoRecheiosGourmet + precoAdicionais + (quantidadeRecheios === 2 ? 10 : 0)
+    const taxaEntregaTotal = tipoEntrega === "entrega" ? taxaEntrega : 0
+    return precoBase + precoRecheiosGourmet + precoAdicionais + (quantidadeRecheios === 2 ? 10 : 0) + taxaEntregaTotal
   }
 
   const dataMinima = addDays(new Date(), 0)
@@ -140,7 +139,6 @@ export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoD
       adicionais: adicionaisSelecionados,
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       tipoEntrega,
-      horario: horarioSelecionado,
       endereco: tipoEntrega === "entrega" ? endereco : null,
       horarioEntrega: horarioEntrega,
     }
@@ -158,7 +156,6 @@ export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoD
     setAdicionaisSelecionados([])
     setDataEntrega(undefined)
     setTipoEntrega("retirada")
-    setHorarioSelecionado("")
     setEndereco({ rua: "", bairro: "", numero: "", complemento: "" })
     setHorarioEntrega("")
   }
@@ -168,13 +165,13 @@ export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoD
     if (etapa === 2 && quantidadeRecheios === 0) return false
     if (etapa === 3 && recheiosSelecionados.length === 0) return false
     if (etapa === 5 && !dataEntrega) return false
-    if (etapa === 6 && !horarioSelecionado) return false
     if (
       etapa === 6 &&
       tipoEntrega === "entrega" &&
       (!endereco.rua || !endereco.bairro || !endereco.numero || !endereco.complemento)
     )
       return false
+    if (etapa === 6 && tipoEntrega === "entrega" && !horarioEntrega) return false
     return true
   }
 
@@ -341,10 +338,7 @@ export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoD
               <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Entrega ou Retirada</h3>
               <RadioGroup
                 value={tipoEntrega}
-                onValueChange={(value: "retirada" | "entrega") => {
-                  setTipoEntrega(value)
-                  setHorarioSelecionado("") // Reseta o horário ao mudar o tipo de entrega
-                }}
+                onValueChange={(value: "retirada" | "entrega") => setTipoEntrega(value)}
                 className="space-y-2"
               >
                 <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
@@ -356,55 +350,55 @@ export function BoloAcetatoDialog({ isOpen, onClose, onAddToCart }: BoloAcetatoD
                 <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
                   <RadioGroupItem value="entrega" id="entrega" />
                   <Label htmlFor="entrega" className={`${sour_candy.className} text-lg flex-grow`}>
-                    Entrega
+                    Entrega (+R${taxaEntrega.toFixed(2)})
                   </Label>
                 </div>
               </RadioGroup>
-
-              <div className="space-y-2">
-                <Label htmlFor="horario" className={`${sour_candy.className} text-sm font-medium`}>
-                  {tipoEntrega === "retirada" ? "Horário de Retirada" : "Horário de Entrega"}
-                </Label>
-                <Select value={horarioSelecionado} onValueChange={setHorarioSelecionado}>
-                  <SelectTrigger id="horario" className="w-full">
-                    <SelectValue placeholder="Selecione um horário" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {(tipoEntrega === "retirada" ? horariosRetirada : horariosEntrega).map((horario) => (
-                      <SelectItem key={horario} value={horario}>
-                        {horario}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
               {tipoEntrega === "entrega" && (
-                <div className="space-y-2">
-                  <Input
-                    placeholder="Rua"
-                    value={endereco.rua}
-                    onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })}
-                    className="w-full"
-                  />
-                  <Input
-                    placeholder="Bairro"
-                    value={endereco.bairro}
-                    onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
-                    className="w-full"
-                  />
-                  <Input
-                    placeholder="Número"
-                    value={endereco.numero}
-                    onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
-                    className="w-full"
-                  />
-                  <Input
-                    placeholder="Complemento"
-                    value={endereco.complemento}
-                    onChange={(e) => setEndereco({ ...endereco, complemento: e.target.value })}
-                    className="w-full"
-                  />
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="horario-entrega" className={`${sour_candy.className} text-sm font-medium`}>
+                      Horário de Entrega
+                    </Label>
+                    <Select value={horarioEntrega} onValueChange={setHorarioEntrega}>
+                      <SelectTrigger id="horario-entrega" className="w-full">
+                        <SelectValue placeholder="Selecione um horário" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {horariosEntrega.map((horario) => (
+                          <SelectItem key={horario} value={horario}>
+                            {horario}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Input
+                      placeholder="Rua"
+                      value={endereco.rua}
+                      onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })}
+                      className="w-full"
+                    />
+                    <Input
+                      placeholder="Bairro"
+                      value={endereco.bairro}
+                      onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
+                      className="w-full"
+                    />
+                    <Input
+                      placeholder="Número"
+                      value={endereco.numero}
+                      onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
+                      className="w-full"
+                    />
+                    <Input
+                      placeholder="Complemento"
+                      value={endereco.complemento}
+                      onChange={(e) => setEndereco({ ...endereco, complemento: e.target.value })}
+                      className="w-full"
+                    />
+                  </div>
                 </div>
               )}
             </div>

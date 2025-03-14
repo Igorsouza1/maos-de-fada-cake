@@ -62,6 +62,9 @@ const topperOpcoes = [
   { id: "3d", nome: "3D", precos: { "17cm": 25, "23cm": 30, "28cm": 35 } },
 ]
 
+// Add a delivery fee constant after the topperOpcoes array
+const taxaEntrega = 20 // R$15 for delivery
+
 interface Produto {
   id: string
   nome: string
@@ -116,6 +119,7 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
     setEtapa(etapa - 1)
   }
 
+  // Update the calcularPrecoTotal function to include the delivery fee when delivery is selected
   const calcularPrecoTotal = () => {
     const precoBase = tamanhos.find((t) => t.id === tamanho)?.preco || 0
     const precoRecheiosGourmet = recheiosSelecionados
@@ -133,7 +137,15 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
         : 0
     }
 
-    return precoBase + precoRecheiosGourmet + precoAdicionais + (quantidadeRecheios === 2 ? 10 : 0) + precoTopper
+    const taxaEntregaTotal = tipoEntrega === "entrega" ? taxaEntrega : 0
+    return (
+      precoBase +
+      precoRecheiosGourmet +
+      precoAdicionais +
+      (quantidadeRecheios === 2 ? 10 : 0) +
+      precoTopper +
+      taxaEntregaTotal
+    )
   }
 
   const dataMinima = addDays(new Date(), 0)
@@ -447,7 +459,7 @@ export function BoloRedondoDialog({ isOpen, onClose, onAddToCart }: BoloRedondoD
                 <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
                   <RadioGroupItem value="entrega" id="entrega" />
                   <Label htmlFor="entrega" className={`${sour_candy.className} text-lg flex-grow`}>
-                    Entrega
+                    Entrega (+R${taxaEntrega.toFixed(2)})
                   </Label>
                 </div>
               </RadioGroup>

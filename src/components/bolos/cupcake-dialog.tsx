@@ -26,6 +26,9 @@ const recheios = ["Doce de leite", "Leite Ninho", "Brigadeiro", "Morango ao Leit
 const horariosRetirada = ["11:00", "12:00", "15:00", "18:00", "19:00"]
 const horariosEntrega = ["13:30", "17:30", "18:00", "19:00"]
 
+// Add a delivery fee constant after the horariosEntrega array
+const taxaEntrega = 20 // R$15 for delivery
+
 interface Produto {
   id: string
   nome: string
@@ -63,16 +66,20 @@ export function CupcakeDialog({ isOpen, onClose, onAddToCart }: CupcakeDialogPro
 
   const dataMinima = addDays(new Date(), 0)
 
+  // Update the handleAddToCart function to include the delivery fee when delivery is selected
   const handleAddToCart = () => {
     const tipoSelecionado = tipos.find((t) => t.id === tipo)
     if (!tipoSelecionado) return
+
+    const precoBase = tipoSelecionado.preco * Number.parseInt(quantidade)
+    const precoTotal = precoBase + (tipoEntrega === "entrega" ? taxaEntrega : 0)
 
     const produto: Produto = {
       id: `cupcake-${Date.now()}`,
       nome: `Cupcake ${tipoSelecionado.nome}`,
       tipo: tipoSelecionado.nome,
       recheio: tipo === "recheado" ? recheio : undefined,
-      preco: tipoSelecionado.preco * Number.parseInt(quantidade),
+      preco: precoTotal,
       quantidade: Number.parseInt(quantidade),
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       tipoEntrega: tipoEntrega,
@@ -84,7 +91,7 @@ export function CupcakeDialog({ isOpen, onClose, onAddToCart }: CupcakeDialogPro
           alt: "Cupcake",
           description: `Cupcake ${tipoSelecionado.nome}`,
           name: `Cupcake ${tipoSelecionado.nome}`,
-          price: tipoSelecionado.preco,
+          price: precoTotal,
         },
       ],
     }
@@ -216,6 +223,7 @@ export function CupcakeDialog({ isOpen, onClose, onAddToCart }: CupcakeDialogPro
             {step === 4 && (
               <div className="space-y-4">
                 <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Entrega ou Retirada</h3>
+                {/* Update the RadioGroup for delivery type to show the delivery fee */}
                 <RadioGroup
                   value={tipoEntrega}
                   onValueChange={(value: "retirada" | "entrega") => {
@@ -233,7 +241,7 @@ export function CupcakeDialog({ isOpen, onClose, onAddToCart }: CupcakeDialogPro
                   <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
                     <RadioGroupItem value="entrega" id="entrega" />
                     <Label htmlFor="entrega" className={`${sour_candy.className} text-lg flex-grow`}>
-                      Entrega
+                      Entrega (+R${taxaEntrega.toFixed(2)})
                     </Label>
                   </div>
                 </RadioGroup>
@@ -302,12 +310,16 @@ export function CupcakeDialog({ isOpen, onClose, onAddToCart }: CupcakeDialogPro
                 Avançar
               </Button>
             ) : (
+              // Update the Button text to show the updated price
               <Button
                 onClick={handleAddToCart}
                 className="bg-pink-500 hover:bg-pink-600 text-white ml-auto"
                 disabled={!isFormValid()}
               >
-                Adicionar ao Carrinho
+                Adicionar ao Carrinho (R$
+                {(tipos.find((t) => t.id === tipo)?.preco || 0) * Number.parseInt(quantidade || "0") +
+                  (tipoEntrega === "entrega" ? taxaEntrega : 0)}
+                .00)
               </Button>
             )}
           </div>

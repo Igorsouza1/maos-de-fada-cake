@@ -29,6 +29,9 @@ const quantidades = [
   { id: "150", nome: "150 docinhos", preco: 210 },
 ]
 
+// Add a delivery fee constant after the quantidades array
+const taxaEntrega = 20 // R$15 for delivery
+
 // Add these constants for pickup and delivery times
 const horariosRetirada = ["11:00", "12:00", "15:00", "18:00", "19:00"]
 const horariosEntrega = ["13:30", "17:30", "18:00", "19:00"]
@@ -81,18 +84,21 @@ export function DocinhosDialog({ isOpen, onClose, onAddToCart }: DocinhosDialogP
     return true
   }
 
+  // Update the handleAddToCart function to include the delivery fee when delivery is selected
   const handleAddToCart = () => {
     const quantidadeObj = quantidades.find((q) => q.id === quantidadeSelecionada)
     if (!quantidadeObj) return
 
     const adicionalNinhoNutella = saboresSelecionados.includes("ninhonutella") ? 20 : 0
+    const precoBase = quantidadeObj.preco + adicionalNinhoNutella
+    const precoTotal = precoBase + (tipoEntrega === "entrega" ? taxaEntrega : 0)
 
     const produto: Produto = {
       id: `docinhos-${Date.now()}`,
       nome: "Docinhos",
       sabores: saboresSelecionados,
       quantidade: Number.parseInt(quantidadeObj.id),
-      preco: quantidadeObj.preco + adicionalNinhoNutella,
+      preco: precoTotal,
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
       tipoEntrega,
       horario: horarioSelecionado,
@@ -103,7 +109,7 @@ export function DocinhosDialog({ isOpen, onClose, onAddToCart }: DocinhosDialogP
           alt: "Docinhos",
           description: "Docinhos variados",
           name: "Docinhos",
-          price: quantidadeObj.preco + adicionalNinhoNutella,
+          price: precoTotal,
         },
       ],
     }
@@ -219,7 +225,7 @@ export function DocinhosDialog({ isOpen, onClose, onAddToCart }: DocinhosDialogP
                   <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
                     <RadioGroupItem value="entrega" id="entrega" />
                     <Label htmlFor="entrega" className={`${sour_candy.className} text-lg flex-grow`}>
-                      Entrega
+                      Entrega (+R${taxaEntrega.toFixed(2)})
                     </Label>
                   </div>
                 </RadioGroup>
@@ -292,7 +298,13 @@ export function DocinhosDialog({ isOpen, onClose, onAddToCart }: DocinhosDialogP
               className="bg-pink-500 hover:bg-pink-600 text-white ml-auto"
               disabled={!isFormValid()}
             >
-              Adicionar ao Carrinho
+              Adicionar ao Carrinho (R$
+              {(
+                (quantidades.find((q) => q.id === quantidadeSelecionada)?.preco || 0) +
+                (saboresSelecionados.includes("ninhonutella") ? 20 : 0) +
+                (tipoEntrega === "entrega" ? taxaEntrega : 0)
+              ).toFixed(2)}
+              )
             </Button>
           )}
         </DialogFooter>

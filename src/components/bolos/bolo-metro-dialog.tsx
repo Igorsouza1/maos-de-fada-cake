@@ -48,6 +48,9 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
+// Add a delivery fee constant after the adicionais array
+const taxaEntrega = 20 // R$15 for delivery
+
 // Add these constants for pickup and delivery times
 const horariosRetirada = ["11:00", "12:00", "15:00", "18:00", "19:00"]
 const horariosEntrega = ["13:30", "17:30", "18:00", "19:00"]
@@ -103,6 +106,7 @@ export function BoloMetroDialog({ isOpen, onClose, onAddToCart }: BoloMetroDialo
     setEtapa(etapa - 1)
   }
 
+  // Update the calcularPrecoTotal function to include the delivery fee when delivery is selected
   const calcularPrecoTotal = () => {
     const precoBase = tamanhos.find((t) => t.id === tamanho)?.preco || 0
     const precoRecheiosGourmet = recheiosSelecionados
@@ -111,7 +115,8 @@ export function BoloMetroDialog({ isOpen, onClose, onAddToCart }: BoloMetroDialo
     const precoAdicionais = adicionaisSelecionados
       .map((a) => adicionais.find((ad) => ad.nome === a)?.preco || 0)
       .reduce((a, b) => a + b, 0)
-    return precoBase + precoRecheiosGourmet + precoAdicionais + (quantidadeRecheios === 2 ? 10 : 0)
+    const taxaEntregaTotal = tipoEntrega === "entrega" ? taxaEntrega : 0
+    return precoBase + precoRecheiosGourmet + precoAdicionais + (quantidadeRecheios === 2 ? 10 : 0) + taxaEntregaTotal
   }
 
   const dataMinima = addDays(new Date(), 0)
@@ -354,6 +359,7 @@ export function BoloMetroDialog({ isOpen, onClose, onAddToCart }: BoloMetroDialo
           {etapa === 7 && (
             <div className="space-y-4">
               <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Entrega ou Retirada</h3>
+              {/* Update the RadioGroup for delivery type to show the delivery fee */}
               <RadioGroup
                 value={tipoEntrega}
                 onValueChange={(value: "retirada" | "entrega") => {
@@ -371,7 +377,7 @@ export function BoloMetroDialog({ isOpen, onClose, onAddToCart }: BoloMetroDialo
                 <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
                   <RadioGroupItem value="entrega" id="entrega" />
                   <Label htmlFor="entrega" className={`${sour_candy.className} text-lg flex-grow`}>
-                    Entrega
+                    Entrega (+R${taxaEntrega.toFixed(2)})
                   </Label>
                 </div>
               </RadioGroup>

@@ -60,9 +60,10 @@ const adicionais = [
   { nome: "Brilho", preco: 20 },
 ]
 
-// Adicione estas constantes no início do arquivo, junto com as outras constantes
-const horariosRetirada = ["11:00", "12:00", "15:00", "18:00", "19:00"]
-const horariosEntrega = ["13:30", "17:30", "18:00", "19:00"]
+// Add a delivery fee constant
+const taxaEntrega = 20 // R$15 for delivery
+
+const horariosEntrega = ["09:00 - 12:00", "14:00 - 17:00", "18:00 - 21:00"]
 
 interface Produto {
   id: string
@@ -86,7 +87,7 @@ interface Produto {
   quantidade?: number
   tipo?: string
   cobertura?: string // Add this for Bolo Piscina
-  horario?: string
+  horarioEntrega?: string
 }
 
 interface BoloAndarDialogProps {
@@ -103,9 +104,9 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
   const [recheiosSelecionados, setRecheiosSelecionados] = useState<string[]>([])
   const [adicionaisSelecionados, setAdicionaisSelecionados] = useState<string[]>([])
   const [dataEntrega, setDataEntrega] = useState<Date | undefined>(undefined)
-  const [tipoEntrega, setTipoEntrega] = useState<"retirada" | "entrega">("retirada")
   const [endereco, setEndereco] = useState({ rua: "", numero: "", bairro: "", complemento: "" })
-  const [horarioSelecionado, setHorarioSelecionado] = useState<string>("")
+  const [horarioEntrega, setHorarioEntrega] = useState<string>("")
+  const [tipoEntrega, setTipoEntrega] = useState<"retirada" | "entrega">("entrega") // Default to delivery for this cake type
 
   const avancarEtapa = () => {
     setEtapa(etapa + 1)
@@ -115,6 +116,7 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
     setEtapa(etapa - 1)
   }
 
+  // Update the calcularPrecoTotal function to include the delivery fee when delivery is selected
   const calcularPrecoTotal = () => {
     const precoBase = tamanhos.find((t) => t.id === tamanho)?.preco || 0
     const precoRecheiosGourmet = recheiosSelecionados
@@ -123,6 +125,7 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
     const precoAdicionais = adicionaisSelecionados
       .map((a) => adicionais.find((ad) => ad.nome === a)?.preco || 0)
       .reduce((a, b) => a + b, 0)
+    // Note: For Bolo Andar, delivery is included in the base price, so we don't add taxaEntrega
     return precoBase + precoRecheiosGourmet + precoAdicionais + (quantidadeRecheios === 2 ? 10 : 0)
   }
 
@@ -138,9 +141,7 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
       adicionais: adicionaisSelecionados,
       preco: calcularPrecoTotal(),
       dataEntrega: dataEntrega ? format(dataEntrega, "dd/MM/yyyy") : "",
-      tipoEntrega,
-      horario: horarioSelecionado,
-      endereco: tipoEntrega === "entrega" ? endereco : null,
+      endereco: endereco,
       imagens: [
         {
           src: "/bolo-de-andar.jpg",
@@ -150,6 +151,8 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
           price: calcularPrecoTotal(),
         },
       ],
+      horarioEntrega: horarioEntrega,
+      tipoEntrega: "entrega", // Always delivery for this cake type
     }
     onAddToCart(produto)
     onClose()
@@ -164,9 +167,9 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
     setRecheiosSelecionados([])
     setAdicionaisSelecionados([])
     setDataEntrega(undefined)
-    setTipoEntrega("retirada")
-    setHorarioSelecionado("")
     setEndereco({ rua: "", numero: "", bairro: "", complemento: "" })
+    setHorarioEntrega("")
+    setTipoEntrega("entrega") // Reset to default delivery
   }
 
   const isFormValid = () => {
@@ -175,9 +178,7 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
     if (etapa === 3 && quantidadeRecheios === 0) return false
     if (etapa === 4 && recheiosSelecionados.length === 0) return false
     if (etapa === 6 && !dataEntrega) return false
-    if (etapa === 7 && !horarioSelecionado) return false
-    if (etapa === 7 && tipoEntrega === "entrega" && (!endereco.rua || !endereco.numero || !endereco.bairro))
-      return false
+    if (etapa === 7 && (!endereco.rua || !endereco.numero || !endereco.bairro || !horarioEntrega)) return false
     return true
   }
 
@@ -367,75 +368,82 @@ export function BoloAndarDialog({ isOpen, onClose, onAddToCart }: BoloAndarDialo
 
             {etapa === 7 && (
               <div className="space-y-4">
-                <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>Entrega ou Retirada</h3>
-                <RadioGroup
-                  value={tipoEntrega}
-                  onValueChange={(value: "retirada" | "entrega") => {
-                    setTipoEntrega(value)
-                    setHorarioSelecionado("") // Reseta o horário ao mudar o tipo de entrega
-                  }}
-                  className="space-y-2"
-                >
-                  <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
-                    <RadioGroupItem value="retirada" id="retirada" />
-                    <Label htmlFor="retirada" className={`${sour_candy.className} text-lg flex-grow`}>
-                      Retirar no local
-                    </Label>
-                  </div>
-                  <div className="flex items-center space-x-2 bg-white p-3 rounded-lg shadow-sm">
-                    <RadioGroupItem value="entrega" id="entrega" />
-                    <Label htmlFor="entrega" className={`${sour_candy.className} text-lg flex-grow`}>
-                      Entrega
-                    </Label>
-                  </div>
-                </RadioGroup>
-
-                <div className="space-y-2">
-                  <Label htmlFor="horario" className={`${sour_candy.className} text-sm font-medium`}>
-                    {tipoEntrega === "retirada" ? "Horário de Retirada" : "Horário de Entrega"}
-                  </Label>
-                  <Select value={horarioSelecionado} onValueChange={setHorarioSelecionado}>
-                    <SelectTrigger id="horario" className="w-full">
-                      <SelectValue placeholder="Selecione um horário" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {(tipoEntrega === "retirada" ? horariosRetirada : horariosEntrega).map((horario) => (
-                        <SelectItem key={horario} value={horario}>
-                          {horario}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {tipoEntrega === "entrega" && (
+                <h3 className={`${pacifico.className} text-2xl text-pink-600 text-center`}>
+                  Endereço e Horário de Entrega
+                </h3>
+                <p className={`${sour_candy.className} text-sm text-center text-pink-500`}>
+                  Preencha o endereço e selecione um horário para entrega do seu bolo
+                </p>
+                <p className={`${sour_candy.className} text-sm text-center text-pink-500 font-bold`}>
+                  OBS: A entrega e topper são gratuitos para o Bolo de Andar!
+                </p>
+                <div className="space-y-4">
                   <div className="space-y-2">
+                    <Label htmlFor="horario-entrega" className={`${sour_candy.className} text-sm font-medium`}>
+                      Horário de Entrega
+                    </Label>
+                    <Select value={horarioEntrega} onValueChange={setHorarioEntrega}>
+                      <SelectTrigger id="horario-entrega" className="w-full">
+                        <SelectValue placeholder="Selecione um horário" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {horariosEntrega.map((horario) => (
+                          <SelectItem key={horario} value={horario}>
+                            {horario}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="rua" className={`${sour_candy.className} text-sm font-medium`}>
+                      Rua
+                    </Label>
                     <Input
+                      id="rua"
                       placeholder="Rua"
                       value={endereco.rua}
                       onChange={(e) => setEndereco({ ...endereco, rua: e.target.value })}
                       className="w-full"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="numero" className={`${sour_candy.className} text-sm font-medium`}>
+                      Número
+                    </Label>
                     <Input
+                      id="numero"
                       placeholder="Número"
                       value={endereco.numero}
                       onChange={(e) => setEndereco({ ...endereco, numero: e.target.value })}
                       className="w-full"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="bairro" className={`${sour_candy.className} text-sm font-medium`}>
+                      Bairro
+                    </Label>
                     <Input
+                      id="bairro"
                       placeholder="Bairro"
                       value={endereco.bairro}
                       onChange={(e) => setEndereco({ ...endereco, bairro: e.target.value })}
                       className="w-full"
                     />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="complemento" className={`${sour_candy.className} text-sm font-medium`}>
+                      Complemento
+                    </Label>
                     <Input
+                      id="complemento"
                       placeholder="Complemento"
                       value={endereco.complemento}
                       onChange={(e) => setEndereco({ ...endereco, complemento: e.target.value })}
                       className="w-full"
                     />
                   </div>
-                )}
+                </div>
               </div>
             )}
           </div>
